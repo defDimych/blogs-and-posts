@@ -25,33 +25,34 @@ export const postsRepository = {
 
     findPostByBlogId(inputBlogId: string) {
         return collectionPosts.find(p => p.blogId === inputBlogId);
-    }
+    },
 
-//     findBlogById(id: string) {
-//         return collectionPosts.find(b => b.id === id);
-//     },
-//
-//     updateBlog(id: string, data: BlogInputModel) {
-//         const foundBlog = collectionPosts.find(b => b.id === id);
-//
-//         if (foundBlog) {
-//             foundBlog.name = data.name;
-//             foundBlog.description = data.description;
-//             foundBlog.websiteUrl = data.websiteUrl;
-//
-//             return true;
-//         }
-//         return false;
-//     },
-//
-//     deleteBlog(id: string) {
-//         const foundBlogIndex = collectionPosts.findIndex(b => b.id === id);
-//
-//         if (foundBlogIndex !== -1) {
-//             collectionPosts.splice(foundBlogIndex, 1);
-//
-//             return true;
-//         }
-//         return false;
-//     }
+    findPostById(id: string) {
+        return collectionPosts.find(p => p.id === id);
+    },
+
+    updatePost(id: string, { title, shortDescription, content, blogId }: PostInputModel) {
+        const foundPost = collectionPosts.find(p => p.id === id);
+
+        if (foundPost) {
+            foundPost.title = title;
+            foundPost.shortDescription = shortDescription;
+            foundPost.content = content;
+            foundPost.blogId = blogId;
+
+            return true;
+        }
+        return false;
+    },
+
+    deletePost(id: string) {
+        const foundPostIndex = collectionPosts.findIndex(p => p.id === id);
+
+        if (foundPostIndex !== -1) {
+            collectionPosts.splice(foundPostIndex, 1);
+
+            return true;
+        }
+        return false;
+    }
 }
