@@ -2,7 +2,7 @@ import express, {Request, Response} from "express";
 import {blogsRepository} from "../repositories/blogs-repository";
 import {HTTP_STATUSES} from "../utils/http-statuses";
 import {BlogInputModel} from "../types/blogs-types/BlogInputModel";
-import {createBlogInputValidationMiddlewares} from "../middlewares/create-blog-input-validation-middlewares";
+import {blogInputValidationMiddlewares} from "../middlewares/blog-input-validation-middlewares";
 import {basicAuthMiddleware} from "../middlewares/auth/basic-auth-middleware";
 import {checkInputErrorsMiddleware} from "../middlewares/check-input-errors-middleware";
 
@@ -16,7 +16,7 @@ export const getBlogsRouter = () => {
     })
     router.post('/',
         basicAuthMiddleware,
-        ...createBlogInputValidationMiddlewares,
+        ...blogInputValidationMiddlewares,
         checkInputErrorsMiddleware,
         (req: Request<any, any, BlogInputModel>, res: Response) => {
         const createdBlog = blogsRepository.createBlog(req.body.name, req.body.description, req.body.websiteUrl);
@@ -33,7 +33,7 @@ export const getBlogsRouter = () => {
     })
     router.put('/:id',
         basicAuthMiddleware,
-        ...createBlogInputValidationMiddlewares,
+        ...blogInputValidationMiddlewares,
         checkInputErrorsMiddleware,
         (req: Request<any, any, BlogInputModel>, res: Response) => {
         const isUpdated = blogsRepository.updateBlog(req.params.id, req.body);
