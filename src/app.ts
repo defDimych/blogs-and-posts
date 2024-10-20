@@ -11,4 +11,4 @@ app.use(express.json());
 
 app.use(SETTINGS.PATH.BLOGS, getBlogsRouter());
 app.use(SETTINGS.PATH.POSTS, getPostsRouter());
-app.use('/testing/all-data', getTestingRouter());
+app.use(SETTINGS.PATH.TESTS, getTestingRouter());

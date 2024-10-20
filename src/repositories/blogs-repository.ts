@@ -1,7 +1,7 @@
 import {BlogViewModel} from "../types/blogs-types/BlogViewModel";
 import {BlogInputModel} from "../types/blogs-types/BlogInputModel";
 
-const collectionBlogs: BlogViewModel[] = [];
+let collectionBlogs: BlogViewModel[] = [];
 
 export const blogsRepository = {
     getAllBlogs() {
@@ -46,5 +46,9 @@ export const blogsRepository = {
             return true;
         }
         return false;
+    },
+
+    deleteAllData() {
+        collectionBlogs = [];
     }
 }
