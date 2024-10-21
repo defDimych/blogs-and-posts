@@ -20,7 +20,7 @@ export const getPostsRouter = () => {
         (req: RequestWithBody<PostInputModel>, res: Response) => {
             const createdPost = postsRepository.createPost(req.body);
 
-            res.status(HTTP_STATUSES.SUCCESS_200).send(createdPost);
+            res.status(HTTP_STATUSES.CREATED_201).send(createdPost);
         })
     router.get('/:id', (req: Request, res: Response) => {
         const foundPost = postsRepository.findPostById(req.params.id);

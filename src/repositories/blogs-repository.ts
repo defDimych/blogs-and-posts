@@ -8,7 +8,7 @@ export const blogsRepository = {
         return collectionBlogs;
     },
 
-    createBlog(name: string, description: string, websiteUrl: string) {
+    createBlog(name: string, description: string, websiteUrl: string): BlogViewModel {
         const newBlog = {
             id: Date.now() + Math.random() + '',
             name,
@@ -16,7 +16,6 @@ export const blogsRepository = {
             websiteUrl
         }
         collectionBlogs.push(newBlog);
-
         return newBlog;
     },
 

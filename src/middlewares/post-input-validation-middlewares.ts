@@ -1,8 +1,9 @@
 import {body} from "express-validator";
 import {postsRepository} from "../repositories/posts-repository";
+import {blogsRepository} from "../repositories/blogs-repository";
 
 export const postInputValidationMiddlewares = [
-    body('name')
+    body('title')
         .isString()
         .withMessage('Invalid data type passed')
         .trim()
@@ -23,11 +24,12 @@ export const postInputValidationMiddlewares = [
         .isLength({ min: 1, max: 1000 })
         .withMessage('Invalid length'),
 
-    body('blogId').custom(inputBlogId => {
-        const found = postsRepository.findPostByBlogId(inputBlogId);
+    body('blogId').custom(blogId => {
+        const foundBlog = blogsRepository.findBlogById(blogId);
 
-        if (!found) {
+        if (!foundBlog) {
             throw new Error("The blog doesn't exist");
         }
+        return true;
     })
 ];

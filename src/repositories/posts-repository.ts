@@ -1,8 +1,7 @@
-import {BlogInputModel} from "../types/blogs-types/BlogInputModel";
 import {PostViewModel} from "../types/posts-types/PostViewModel";
 import {PostInputModel} from "../types/posts-types/PostInputModel";
 
-const collectionPosts: PostViewModel[] = [];
+let collectionPosts: PostViewModel[] = [];
 
 export const postsRepository = {
     getAllPosts() {
@@ -21,10 +20,6 @@ export const postsRepository = {
         collectionPosts.push(newPost);
 
         return newPost;
-    },
-
-    findPostByBlogId(inputBlogId: string) {
-        return collectionPosts.find(p => p.blogId === inputBlogId);
     },
 
     findPostById(id: string) {
@@ -54,5 +49,9 @@ export const postsRepository = {
             return true;
         }
         return false;
+    },
+
+    deleteAllData() {
+        collectionPosts = [];
     }
 }
