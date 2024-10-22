@@ -9,3 +9,4 @@ const startApp = async () => {
     })
 }
 
+startApp();

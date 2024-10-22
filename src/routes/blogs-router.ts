@@ -1,5 +1,5 @@
 import express, {Request, Response} from "express";
-import {blogsRepository} from "../repositories/blogs-repository";
+import {blogsInMemoryRepository} from "../repositories/blogs-in-memory-repository";
 import {HTTP_STATUSES} from "../utils/http-statuses";
 import {BlogInputModel} from "../types/blogs-types/BlogInputModel";
 import {blogInputValidationMiddlewares} from "../middlewares/blog-input-validation-middlewares";
@@ -9,18 +9,18 @@ import {checkInputErrorsMiddleware} from "../middlewares/check-input-errors-midd
 export const getBlogsRouter = () => {
     const router = express.Router();
 
-    router.get('/', (req: Request, res: Response) => {
-        const allBlogs = blogsRepository.getAllBlogs();
+    router.get('/', async (req: Request, res: Response) => {
+        const allBlogs = await blogsInMemoryRepository.getAllBlogs();
 
         res.status(HTTP_STATUSES.SUCCESS_200).send(allBlogs);
     })
     router.post('/', basicAuthMiddleware, ...blogInputValidationMiddlewares, checkInputErrorsMiddleware,
-        (req: Request<any, any, BlogInputModel>, res: Response) => {
-            const createdBlog = blogsRepository.createBlog(req.body.name, req.body.description, req.body.websiteUrl);
+        async (req: Request<any, any, BlogInputModel>, res: Response) => {
+            const createdBlog = await blogsInMemoryRepository.createBlog(req.body.name, req.body.description, req.body.websiteUrl);
             res.status(HTTP_STATUSES.CREATED_201).send(createdBlog);
         })
-    router.get('/:id', (req: Request, res: Response) => {
-        const foundBlog = blogsRepository.findBlogById(req.params.id);
+    router.get('/:id', async (req: Request, res: Response) => {
+        const foundBlog = await blogsInMemoryRepository.findBlogById(req.params.id);
 
         if (!foundBlog) {
             res.sendStatus(HTTP_STATUSES.NOT_FOUND_404);
@@ -29,8 +29,8 @@ export const getBlogsRouter = () => {
         res.status(HTTP_STATUSES.SUCCESS_200).send(foundBlog);
     })
     router.put('/:id', basicAuthMiddleware, ...blogInputValidationMiddlewares, checkInputErrorsMiddleware,
-        (req: Request<any, any, BlogInputModel>, res: Response) => {
-            const isUpdated = blogsRepository.updateBlog(req.params.id, req.body);
+        async (req: Request<any, any, BlogInputModel>, res: Response) => {
+            const isUpdated = await blogsInMemoryRepository.updateBlog(req.params.id, req.body);
 
             if (isUpdated) {
                 res.sendStatus(HTTP_STATUSES.NO_CONTENT_204);
@@ -38,8 +38,8 @@ export const getBlogsRouter = () => {
                 res.sendStatus(HTTP_STATUSES.NOT_FOUND_404);
             }
         })
-    router.delete('/:id', basicAuthMiddleware, (req: Request, res: Response) => {
-        const isDeleted = blogsRepository.deleteBlog(req.params.id);
+    router.delete('/:id', basicAuthMiddleware, async (req: Request, res: Response) => {
+        const isDeleted = await blogsInMemoryRepository.deleteBlog(req.params.id);
 
         if (isDeleted) {
             res.sendStatus(HTTP_STATUSES.NO_CONTENT_204);
