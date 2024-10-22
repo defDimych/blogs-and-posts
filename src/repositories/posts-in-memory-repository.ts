@@ -3,12 +3,12 @@ import {PostInputModel} from "../types/posts-types/PostInputModel";
 
 let collectionPosts: PostViewModel[] = [];
 
-export const postsRepository = {
-    getAllPosts() {
+export const postsInMemoryRepository = {
+    async getAllPosts(): Promise<PostViewModel[]> {
         return collectionPosts;
     },
 
-    createPost({ title, shortDescription, content, blogId }: PostInputModel) {
+    async createPost({ title, shortDescription, content, blogId }: PostInputModel): Promise<PostViewModel> {
         const newPost = {
             id: Date.now() + Math.random() + '',
             title,
@@ -22,11 +22,11 @@ export const postsRepository = {
         return newPost;
     },
 
-    findPostById(id: string) {
+    async findPostById(id: string): Promise<PostViewModel | undefined> {
         return collectionPosts.find(p => p.id === id);
     },
 
-    updatePost(id: string, { title, shortDescription, content, blogId }: PostInputModel) {
+    async updatePost(id: string, { title, shortDescription, content, blogId }: PostInputModel): Promise<boolean> {
         const foundPost = collectionPosts.find(p => p.id === id);
 
         if (foundPost) {
@@ -40,7 +40,7 @@ export const postsRepository = {
         return false;
     },
 
-    deletePost(id: string) {
+    async deletePost(id: string): Promise<boolean> {
         const foundPostIndex = collectionPosts.findIndex(p => p.id === id);
 
         if (foundPostIndex !== -1) {
