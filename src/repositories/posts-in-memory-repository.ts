@@ -3,7 +3,7 @@ import {PostInputModel} from "../types/posts-types/PostInputModel";
 
 let collectionPosts: PostViewModel[] = [];
 
-export const postsInMemoryRepository = {
+export const postsRepository = {
     async getAllPosts(): Promise<PostViewModel[]> {
         return collectionPosts;
     },

@@ -1,5 +1,5 @@
 import express, { Request, Response } from "express";
-import {postsInMemoryRepository} from "../repositories/posts-in-memory-repository";
+import {postsRepository} from "../repositories/posts-in-memory-repository";
 import {PostViewModel} from "../types/posts-types/PostViewModel";
 import {HTTP_STATUSES} from "../utils/http-statuses";
 import {basicAuthMiddleware} from "../middlewares/auth/basic-auth-middleware";
@@ -12,18 +12,18 @@ export const getPostsRouter = () => {
     const router = express.Router();
 
     router.get('/', async (req: Request, res: Response) => {
-        const allPosts: PostViewModel[] = await postsInMemoryRepository.getAllPosts();
+        const allPosts: PostViewModel[] = await postsRepository.getAllPosts();
 
         res.status(HTTP_STATUSES.SUCCESS_200).send(allPosts);
     })
     router.post('/', basicAuthMiddleware, ...postInputValidationMiddlewares, checkInputErrorsMiddleware,
         async (req: RequestWithBody<PostInputModel>, res: Response) => {
-            const createdPost = await postsInMemoryRepository.createPost(req.body);
+            const createdPost = await postsRepository.createPost(req.body);
 
             res.status(HTTP_STATUSES.CREATED_201).send(createdPost);
         })
     router.get('/:id', async (req: Request, res: Response) => {
-        const foundPost = await postsInMemoryRepository.findPostById(req.params.id);
+        const foundPost = await postsRepository.findPostById(req.params.id);
 
         if (!foundPost) {
             res.sendStatus(HTTP_STATUSES.NOT_FOUND_404);
@@ -33,7 +33,7 @@ export const getPostsRouter = () => {
     })
     router.put('/:id', basicAuthMiddleware, ...postInputValidationMiddlewares, checkInputErrorsMiddleware,
         async (req: RequestWithParamsAndBody<{ id: string }, PostInputModel>, res: Response) => {
-            const isUpdated = await postsInMemoryRepository.updatePost(req.params.id, req.body);
+            const isUpdated = await postsRepository.updatePost(req.params.id, req.body);
 
             if (isUpdated) {
                 res.sendStatus(HTTP_STATUSES.NO_CONTENT_204);
@@ -42,7 +42,7 @@ export const getPostsRouter = () => {
             }
         })
     router.delete('/:id', basicAuthMiddleware, async (req: Request, res: Response) => {
-        const isDeleted = await postsInMemoryRepository.deletePost(req.params.id);
+        const isDeleted = await postsRepository.deletePost(req.params.id);
 
         if (isDeleted) {
             res.sendStatus(HTTP_STATUSES.NO_CONTENT_204);

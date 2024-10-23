@@ -3,7 +3,7 @@ import {BlogInputModel} from "../types/blogs-types/BlogInputModel";
 
 let collectionBlogs: BlogViewModel[] = [];
 
-export const blogsInMemoryRepository = {
+export const blogsRepository = {
     async getAllBlogs(): Promise<BlogViewModel[]> {
         return collectionBlogs;
     },
