@@ -1,5 +1,6 @@
 import {MongoClient} from "mongodb";
 import {SETTINGS} from "../utils/settings";
+import {ExtendedBlogViewModel} from "../types/blogs-types/BlogViewModel";
 
 export const client = new MongoClient(SETTINGS.MONGO_URI);
 
@@ -15,3 +16,6 @@ export async function runDb() {
         await client.close();
     }
 }
+
+// Collections
+export const blogsCollection = client.db('blogs-and-posts').collection<ExtendedBlogViewModel>('blogs');
