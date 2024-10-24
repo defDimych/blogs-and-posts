@@ -5,10 +5,18 @@ import {HTTP_STATUSES} from "../src/utils/http-statuses";
 import {fromUTF8ToBase64} from "../src/middlewares/auth/basic-auth-middleware";
 import {BlogViewModel} from "../src/types/blogs-types/BlogViewModel";
 import {blogsTestManager} from "./blogsTestManager";
+import {MongoMemoryServer} from "mongodb-memory-server";
+import {blogsCollection, runDb} from "../src/repositories/db";
 
-describe('tests for /blogs', () => {
+describe('tests for /blogs', async () => {
+    let server: MongoMemoryServer;
+
     beforeAll(async () => {
-        await req.delete(SETTINGS.PATH.TESTS).expect(HTTP_STATUSES.NO_CONTENT_204);
+        server = await MongoMemoryServer.create();
+        const uri = server.getUri();
+
+        await runDb(uri);
+        await blogsCollection.drop();
     })
 
     it ('should return 200 and empty array', async () => {
@@ -19,8 +27,8 @@ describe('tests for /blogs', () => {
 
     it ('shouldn\'t create entity 401', async () => {
         const data = {
-            name: 'dev1',
-            description: 'dev2',
+            name: 'n1',
+            description: 'd2',
             websiteUrl: 'http://some.com'
         }
 
@@ -37,8 +45,8 @@ describe('tests for /blogs', () => {
     let createdBlog1: BlogViewModel | null = null;
     it ('should create entity', async () => {
         const data = {
-            name: 'Dimych',
-            description: 'Developer',
+            name: 'n1',
+            description: 'd1',
             websiteUrl: 'https://it-incubator.io/en'
         }
 

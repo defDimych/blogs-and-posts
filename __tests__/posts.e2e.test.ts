@@ -5,10 +5,18 @@ import {HTTP_STATUSES} from "../src/utils/http-statuses";
 import {fromUTF8ToBase64} from "../src/middlewares/auth/basic-auth-middleware";
 import {PostViewModel} from "../src/types/posts-types/PostViewModel";
 import {blogsTestManager} from "./blogsTestManager";
+import {MongoMemoryServer} from "mongodb-memory-server";
+import {postsCollection, runDb} from "../src/repositories/db";
 
-describe('tests for /posts', () => {
+describe('tests for /posts', async () => {
+    let server: MongoMemoryServer;
+
     beforeAll(async () => {
-        await req.delete(SETTINGS.PATH.TESTS).expect(HTTP_STATUSES.NO_CONTENT_204);
+        server = await MongoMemoryServer.create();
+        const uri = server.getUri();
+
+        await runDb(uri);
+        await postsCollection.drop();
     })
 
     it('should return 200 and empty array', async () => {
@@ -155,4 +163,8 @@ describe('tests for /posts', () => {
             .get(SETTINGS.PATH.POSTS)
             .expect(HTTP_STATUSES.SUCCESS_200, []);
     })
+
+    // afterAll(done => {
+    //     done();
+    // })
 })

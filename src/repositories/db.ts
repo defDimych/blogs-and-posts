@@ -1,10 +1,18 @@
-import {MongoClient} from "mongodb";
-import {SETTINGS} from "../utils/settings";
+import {Collection, MongoClient} from "mongodb";
 import {ExtendedBlogViewModel} from "../types/blogs-types/BlogViewModel";
+import {ExtendedPostViewModel} from "../types/posts-types/PostViewModel";
 
-export const client = new MongoClient(SETTINGS.MONGO_URI);
+// Collections
+export let blogsCollection: Collection<ExtendedBlogViewModel>;
+export let postsCollection: Collection<ExtendedPostViewModel>
 
-export async function runDb() {
+export async function runDb(url: string) {
+    const client = new MongoClient(url);
+    const db = client.db('blogs-and-posts');
+
+    blogsCollection = db.collection('blogs');
+    postsCollection = db.collection('posts');
+
     try {
         await client.connect();
         await client.db('blogs').command({ ping: 1 });
@@ -16,6 +24,3 @@ export async function runDb() {
         await client.close();
     }
 }
-
-// Collections
-export const blogsCollection = client.db('blogs-and-posts').collection<ExtendedBlogViewModel>('blogs');

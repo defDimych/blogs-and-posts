@@ -3,7 +3,7 @@ import {SETTINGS} from "./utils/settings";
 import {runDb} from "./repositories/db";
 
 const startApp = async () => {
-    await runDb();
+    await runDb(SETTINGS.MONGO_URI);
     app.listen(SETTINGS.PORT, () => {
         console.log(`Example app listening on port ${SETTINGS.PORT}`);
     })

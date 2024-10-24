@@ -6,3 +6,7 @@ export type PostViewModel = {
     blogId: string,
     blogName: string
 }
+
+export interface ExtendedPostViewModel extends PostViewModel {
+    createdAt?: string,
+}

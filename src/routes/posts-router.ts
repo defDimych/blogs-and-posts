@@ -1,5 +1,4 @@
 import express, { Request, Response } from "express";
-import {postsRepository} from "../repositories/posts-in-memory-repository";
 import {PostViewModel} from "../types/posts-types/PostViewModel";
 import {HTTP_STATUSES} from "../utils/http-statuses";
 import {basicAuthMiddleware} from "../middlewares/auth/basic-auth-middleware";
@@ -7,6 +6,7 @@ import {checkInputErrorsMiddleware} from "../middlewares/check-input-errors-midd
 import {RequestWithBody, RequestWithParamsAndBody} from "../types/request-types";
 import {PostInputModel} from "../types/posts-types/PostInputModel";
 import {postInputValidationMiddlewares} from "../middlewares/post-input-validation-middlewares";
+import {postsRepository} from "../repositories/posts-db-repository";
 
 export const getPostsRouter = () => {
     const router = express.Router();

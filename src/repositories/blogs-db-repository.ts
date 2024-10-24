@@ -24,7 +24,6 @@ export const blogsRepository = {
         return await blogsCollection.findOne({ id });
     },
 
-    // TODO: Рефактор параметров
     async updateBlog(id: string, {name, description, websiteUrl}: BlogInputModel): Promise<boolean> {
         const result = await blogsCollection.updateOne(
             { id }, { $set: { name, description, websiteUrl } }
