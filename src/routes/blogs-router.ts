@@ -16,7 +16,7 @@ export const getBlogsRouter = () => {
     })
     router.post('/', basicAuthMiddleware, ...blogInputValidationMiddlewares, checkInputErrorsMiddleware,
         async (req: Request<any, any, BlogInputModel>, res: Response) => {
-            const createdBlog = await blogsRepository.createBlog(req.body.name, req.body.description, req.body.websiteUrl);
+            const createdBlog = await blogsRepository.createBlog(req.body);
             res.status(HTTP_STATUSES.CREATED_201).send(createdBlog);
         })
     router.get('/:id', async (req: Request, res: Response) => {
