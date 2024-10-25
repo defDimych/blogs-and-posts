@@ -1,10 +1,10 @@
 import {Collection, MongoClient} from "mongodb";
-import {ExtendedBlogViewModel} from "../types/blogs-types/BlogViewModel";
-import {ExtendedPostViewModel} from "../types/posts-types/PostViewModel";
+import {BlogDbModel} from "../types/blogs-types/BlogDbModel";
+import {PostDbModel} from "../types/posts-types/PostDbModel";
 
 // Collections
-export let blogsCollection: Collection<ExtendedBlogViewModel>;
-export let postsCollection: Collection<ExtendedPostViewModel>
+export let blogsCollection: Collection<BlogDbModel>
+export let postsCollection: Collection<PostDbModel>
 
 export async function runDb(url: string) {
     const client = new MongoClient(url);
