@@ -1,6 +1,7 @@
 import {ExtendedBlogViewModel} from "../types/blogs-types/BlogViewModel";
 import {BlogInputModel} from "../types/blogs-types/BlogInputModel";
 import {blogsCollection} from "./db";
+import {ObjectId} from "mongodb";
 
 export const blogsRepository = {
     async getAllBlogs(): Promise<ExtendedBlogViewModel[]> {
@@ -9,6 +10,7 @@ export const blogsRepository = {
 
     async createBlog({ name, description, websiteUrl }: BlogInputModel): Promise<ExtendedBlogViewModel> {
         const newBlog = {
+            _id: new ObjectId(),
             id: Date.now() + Math.random() + '',
             name,
             description,
