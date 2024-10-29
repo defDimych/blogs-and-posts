@@ -22,14 +22,7 @@ export const blogsRepository = {
         return blogs.map(blogMapper)
     },
 
-    async createBlog({ name, description, websiteUrl }: BlogInputModel): Promise<ExtendedBlogViewModel | null> {
-        const newBlog = {
-            name,
-            description,
-            websiteUrl,
-            createdAt: new Date().toISOString(),
-            isMembership: false
-        }
+    async createBlog(newBlog: BlogDbModel): Promise<ExtendedBlogViewModel | null> {
         const result = await blogsCollection.insertOne(newBlog);
         const blogId = result.insertedId.toString();
 
@@ -43,8 +36,7 @@ export const blogsRepository = {
     },
 
     async findBlogById(id: string): Promise<ExtendedBlogViewModel | null> {
-        const objId = new ObjectId(id);
-        const blog: WithId<BlogDbModel> | null = await blogsCollection.findOne({ _id: objId });
+        const blog: WithId<BlogDbModel> | null = await blogsCollection.findOne({ _id: new ObjectId(id) });
 
         if (blog) {
             return blogMapper(blog);
@@ -54,17 +46,15 @@ export const blogsRepository = {
     },
 
     async updateBlog(id: string, {name, description, websiteUrl}: BlogInputModel): Promise<boolean> {
-        const objId = new ObjectId(id);
         const result = await blogsCollection.updateOne(
-            { _id: objId }, { $set: { name, description, websiteUrl } }
+            { _id: new ObjectId(id) }, { $set: { name, description, websiteUrl } }
         )
 
         return result.modifiedCount === 1;
     },
 
     async deleteBlog(id: string): Promise<boolean> {
-        const objId = new ObjectId(id);
-        const result = await blogsCollection.deleteOne({ _id: objId });
+        const result = await blogsCollection.deleteOne({ _id: new ObjectId(id) });
 
         return result.deletedCount === 1;
     }

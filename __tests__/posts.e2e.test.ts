@@ -3,10 +3,9 @@ import {req} from "./test-helpers";
 import {SETTINGS} from "../src/utils/settings";
 import {HTTP_STATUSES} from "../src/utils/http-statuses";
 import {fromUTF8ToBase64} from "../src/middlewares/auth/basic-auth-middleware";
-import {PostViewModel} from "../src/types/posts-types/PostViewModel";
 import {blogsTestManager} from "./blogsTestManager";
 import {MongoMemoryServer} from "mongodb-memory-server";
-import {blogsCollection, postsCollection, runDb} from "../src/repositories/db";
+import {postsCollection, runDb} from "../src/repositories/db";
 import {ObjectId} from "mongodb";
 import {postsTestManager} from "./postsTestManager";
 
