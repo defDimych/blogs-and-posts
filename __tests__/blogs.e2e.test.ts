@@ -52,11 +52,11 @@ describe('tests for /blogs', async () => {
             websiteUrl: 'https://it-incubator.io/en'
         }
 
-        const {createdEntity} = await blogsTestManager.createBlog(data);
+        const {createdBlog} = await blogsTestManager.createBlog(data);
 
         await req
             .get(SETTINGS.PATH.BLOGS)
-            .expect(HTTP_STATUSES.SUCCESS_200, [createdEntity]);
+            .expect(HTTP_STATUSES.SUCCESS_200, [createdBlog]);
     })
 
     it ('Should not create an entity with incorrect input data', async () => {
@@ -92,11 +92,11 @@ describe('tests for /blogs', async () => {
             websiteUrl: 'https://it-incubator.io/en'
         }
 
-        const {createdEntity} = await blogsTestManager.createBlog(data);
+        const {createdBlog} = await blogsTestManager.createBlog(data);
 
         await req
-            .get(SETTINGS.PATH.BLOGS + '/' + createdEntity.id)
-            .expect(HTTP_STATUSES.SUCCESS_200, createdEntity);
+            .get(SETTINGS.PATH.BLOGS + '/' + createdBlog.id)
+            .expect(HTTP_STATUSES.SUCCESS_200, createdBlog);
     })
 
     it('Shouldn\'t update a non-existent entity', async () => {
@@ -128,10 +128,10 @@ describe('tests for /blogs', async () => {
             websiteUrl: 'https://it-incubator.io/en'
         }
 
-        const {createdEntity} = await blogsTestManager.createBlog(data);
+        const {createdBlog} = await blogsTestManager.createBlog(data);
 
         await req
-            .put(SETTINGS.PATH.BLOGS + '/' + createdEntity.id)
+            .put(SETTINGS.PATH.BLOGS + '/' + createdBlog.id)
             .set({ "Authorization": 'Basic ' + fromUTF8ToBase64(SETTINGS.CREDENTIALS) })
             .send(dataToUpdate)
             .expect(HTTP_STATUSES.NO_CONTENT_204);
@@ -153,10 +153,10 @@ describe('tests for /blogs', async () => {
             websiteUrl: 'https://it-incubator.io/en'
         }
 
-        const {createdEntity} = await blogsTestManager.createBlog(data);
+        const {createdBlog} = await blogsTestManager.createBlog(data);
 
         await req
-            .delete(SETTINGS.PATH.BLOGS + '/' + createdEntity.id)
+            .delete(SETTINGS.PATH.BLOGS + '/' + createdBlog.id)
             .set({"Authorization": 'Basic ' + fromUTF8ToBase64(SETTINGS.CREDENTIALS)})
             .expect(HTTP_STATUSES.NO_CONTENT_204);
 

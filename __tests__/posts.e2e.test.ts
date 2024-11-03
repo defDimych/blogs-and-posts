@@ -3,10 +3,11 @@ import {req} from "./test-helpers";
 import {SETTINGS} from "../src/utils/settings";
 import {HTTP_STATUSES} from "../src/utils/http-statuses";
 import {fromUTF8ToBase64} from "../src/middlewares/auth/basic-auth-middleware";
-import {PostViewModel} from "../src/types/posts-types/PostViewModel";
 import {blogsTestManager} from "./blogsTestManager";
 import {MongoMemoryServer} from "mongodb-memory-server";
 import {postsCollection, runDb} from "../src/repositories/db";
+import {ObjectId} from "mongodb";
+import {postsTestManager} from "./postsTestManager";
 
 describe('tests for /posts', async () => {
     let server: MongoMemoryServer;
@@ -16,6 +17,9 @@ describe('tests for /posts', async () => {
         const uri = server.getUri();
 
         await runDb(uri);
+    })
+
+    beforeEach(async () => {
         await postsCollection.drop();
     })
 
@@ -42,7 +46,6 @@ describe('tests for /posts', async () => {
             .expect(HTTP_STATUSES.SUCCESS_200, []);
     })
 
-    let createdPost1: PostViewModel | null = null;
     it('should create entity', async () => {
         const newBlog = {
             name: 'n1',
@@ -50,33 +53,20 @@ describe('tests for /posts', async () => {
             websiteUrl: 'https://it-incubator.io/en'
         }
 
-        const {createdEntity} = await blogsTestManager.createBlog(newBlog);
+        const {createdBlog} = await blogsTestManager.createBlog(newBlog);
 
         const newPost = {
             title: 't1',
             shortDescription: 's1',
             content: 'c1',
-            blogId: createdEntity.id
+            blogId: createdBlog.id
         }
 
-        const res = await req
-            .post(SETTINGS.PATH.POSTS)
-            .set({"Authorization": 'Basic ' + fromUTF8ToBase64(SETTINGS.CREDENTIALS)})
-            .send(newPost)
-            .expect(HTTP_STATUSES.CREATED_201);
-
-        createdPost1 = res.body;
-
-        expect(res.body.title).toEqual(newPost.title);
-        expect(res.body.shortDescription).toEqual(newPost.shortDescription);
-        expect(res.body.content).toEqual(newPost.content);
-        expect(res.body.blogId).toEqual(newPost.blogId);
-        expect(typeof res.body.id).toEqual('string');
-        expect(typeof res.body.blogName).toEqual('string');
+        const {createdPost} = await postsTestManager.createPost(newPost);
 
         await req
             .get(SETTINGS.PATH.POSTS)
-            .expect(HTTP_STATUSES.SUCCESS_200, [createdPost1]);
+            .expect(HTTP_STATUSES.SUCCESS_200, [createdPost]);
     })
 
     it('Should not create an entity with incorrect input data', async () => {
@@ -100,62 +90,125 @@ describe('tests for /posts', async () => {
 
         await req
             .get(SETTINGS.PATH.POSTS)
-            .expect(HTTP_STATUSES.SUCCESS_200, [createdPost1]);
+            .expect(HTTP_STATUSES.SUCCESS_200, []);
     })
 
 
     it('should return 404 for not existing entity', async () => {
+        const id = new ObjectId();
+
         await req
-            .get(SETTINGS.PATH.POSTS + '/' + -100)
+            .get(SETTINGS.PATH.POSTS + '/' + id)
             .expect(HTTP_STATUSES.NOT_FOUND_404);
     })
 
     it('Must find an existing entity.', async () => {
+        const newBlog = {
+            name: 'n1',
+            description: 'd1',
+            websiteUrl: 'https://it-incubator.io/en'
+        }
+
+        const {createdBlog} = await blogsTestManager.createBlog(newBlog);
+
+        const newPost = {
+            title: 't1',
+            shortDescription: 's1',
+            content: 'c1',
+            blogId: createdBlog.id
+        }
+
+        const {createdPost} = await postsTestManager.createPost(newPost);
+
         await req
-            .get(SETTINGS.PATH.POSTS + '/' + createdPost1!.id)
-            .expect(HTTP_STATUSES.SUCCESS_200, createdPost1);
+            .get(SETTINGS.PATH.POSTS + '/' + createdPost.id)
+            .expect(HTTP_STATUSES.SUCCESS_200, createdPost);
     })
 
     it('Shouldn\'t update a non-existent entity', async () => {
+        const newBlog = {
+            name: 'n1',
+            description: 'd1',
+            websiteUrl: 'https://it-incubator.io/en'
+        }
+
+        const {createdBlog} = await blogsTestManager.createBlog(newBlog);
+
         const data = {
             title: 't1',
             shortDescription: 's1',
             content: 'c1',
-            blogId: createdPost1!.blogId
+            blogId: createdBlog.id
         }
 
         await req
-            .put(SETTINGS.PATH.POSTS + '/' + -100)
+            .put(SETTINGS.PATH.POSTS + '/' + new ObjectId())
             .set({ "Authorization": 'Basic ' + fromUTF8ToBase64(SETTINGS.CREDENTIALS) })
             .send(data)
             .expect(HTTP_STATUSES.NOT_FOUND_404);
     })
 
     it('Must update existing entity', async () => {
+        const newBlog = {
+            name: 'n1',
+            description: 'd1',
+            websiteUrl: 'https://it-incubator.io/en'
+        }
+
+        const {createdBlog} = await blogsTestManager.createBlog(newBlog);
+
+        const newPost = {
+            title: 't1',
+            shortDescription: 's1',
+            content: 'c1',
+            blogId: createdBlog.id
+        }
+
+        const {createdPost} = await postsTestManager.createPost(newPost);
+
         const data = {
             title: 't2',
             shortDescription: 's2',
             content: 'c2',
-            blogId: createdPost1!.blogId
+            blogId: createdPost.blogId
         }
 
         await req
-            .put(SETTINGS.PATH.POSTS + '/' + createdPost1!.id)
+            .put(SETTINGS.PATH.POSTS + '/' + createdPost.id)
             .set({ "Authorization": 'Basic ' + fromUTF8ToBase64(SETTINGS.CREDENTIALS) })
             .send(data)
             .expect(HTTP_STATUSES.NO_CONTENT_204);
     })
 
     it('Shouldn\'t delete a non-existent entity', async () => {
+        const id = new ObjectId();
+
         await req
-            .delete(SETTINGS.PATH.POSTS + '/' + -100)
+            .delete(SETTINGS.PATH.POSTS + '/' + id)
             .set({"Authorization": 'Basic ' + fromUTF8ToBase64(SETTINGS.CREDENTIALS)})
             .expect(HTTP_STATUSES.NOT_FOUND_404);
     })
 
     it('Must delete existing entity', async () => {
+        const newBlog = {
+            name: 'n1',
+            description: 'd1',
+            websiteUrl: 'https://it-incubator.io/en'
+        }
+
+        const {createdBlog} = await blogsTestManager.createBlog(newBlog);
+
+        const newPost = {
+            title: 't1',
+            shortDescription: 's1',
+            content: 'c1',
+            blogId: createdBlog.id
+        }
+
+        const {createdPost} = await postsTestManager.createPost(newPost);
+
         await req
-            .delete(SETTINGS.PATH.POSTS + '/' + createdPost1!.id)
+            .delete(SETTINGS.PATH.POSTS + '/' + createdPost.id)
             .set({"Authorization": 'Basic ' + fromUTF8ToBase64(SETTINGS.CREDENTIALS)})
             .expect(HTTP_STATUSES.NO_CONTENT_204);
 
@@ -163,8 +216,4 @@ describe('tests for /posts', async () => {
             .get(SETTINGS.PATH.POSTS)
             .expect(HTTP_STATUSES.SUCCESS_200, []);
     })
-
-    // afterAll(done => {
-    //     done();
-    // })
 })

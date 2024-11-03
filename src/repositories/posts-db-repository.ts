@@ -23,15 +23,7 @@ export const postsRepository = {
         return posts.map(postMapper);
     },
 
-    async createPost({ title, shortDescription, content, blogId }: PostInputModel): Promise<ExtendedPostViewModel | null> {
-        const newPost = {
-            title,
-            shortDescription,
-            content,
-            blogId,
-            blogName: 'IT-INCUBATOR',
-            createdAt: new Date().toISOString()
-        }
+    async createPost(newPost: PostDbModel): Promise<ExtendedPostViewModel | null> {
         const result = await postsCollection.insertOne(newPost);
         const postId = result.insertedId.toString();
 
@@ -45,8 +37,7 @@ export const postsRepository = {
     },
 
     async findPostById(id: string): Promise<ExtendedPostViewModel | null> {
-        const objId = new ObjectId(id);
-        const post: WithId<PostDbModel> | null = await postsCollection.findOne({ _id: objId});
+        const post: WithId<PostDbModel> | null = await postsCollection.findOne({ _id: new ObjectId(id) });
 
         if (post) {
             return postMapper(post);
@@ -56,17 +47,15 @@ export const postsRepository = {
     },
 
     async updatePost(id: string, { title, shortDescription, content, blogId }: PostInputModel): Promise<boolean> {
-        const objId = new ObjectId(id);
         const result = await postsCollection.updateOne(
-            { _id: objId }, { $set: {title, shortDescription, content, blogId} }
+            { _id: new ObjectId(id) }, { $set: {title, shortDescription, content, blogId} }
         );
 
         return result.modifiedCount === 1;
     },
 
     async deletePost(id: string): Promise<boolean> {
-        const objId = new ObjectId(id);
-        const result = await postsCollection.deleteOne({ _id: objId });
+        const result = await postsCollection.deleteOne({ _id: new ObjectId(id) });
 
         return result.deletedCount === 1;
     }

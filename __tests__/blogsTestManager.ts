@@ -23,6 +23,6 @@ export const blogsTestManager = {
             expect(typeof res.body.id).toEqual('string');
         }
 
-        return {res, createdEntity};
+        return {res, createdBlog: createdEntity};
     }
 }
