@@ -6,18 +6,19 @@ import {basicAuthMiddleware} from "../middlewares/auth/basic-auth-middleware";
 import {checkInputErrorsMiddleware} from "../middlewares/check-input-errors-middleware";
 import {blogsService} from "../domain/blogs-service";
 import {postInputValidationMiddlewares} from "../middlewares/post-input-validation-middlewares";
-import {RequestWithParamsAndBody} from "../types/request-types";
+import {RequestWithParamsAndBody, RequestWithQuery} from "../types/request-types";
 import {BlogPostInputModel} from "../types/posts-types/BlogPostInputModel";
 import {postsService} from "../domain/posts-service";
 import {blogsRepository} from "../repositories/blogs-db-repository";
+import {TPaginationOptions} from "../types/TPaginationOptions";
 
 export const getBlogsRouter = () => {
     const router = express.Router();
 
-    router.get('/', async (req: Request, res: Response) => {
-        const allBlogs = await blogsService.getAllBlogs();
+    router.get('/', async (req: RequestWithQuery<TPaginationOptions>, res: Response) => {
+        const receivedBlogs = await blogsRepository.getAllBlogs(req.query);
 
-        res.status(HTTP_STATUSES.SUCCESS_200).send(allBlogs);
+        res.status(HTTP_STATUSES.SUCCESS_200).send(receivedBlogs);
     })
     router.post('/', basicAuthMiddleware, ...blogInputValidationMiddlewares, checkInputErrorsMiddleware,
         async (req: Request<any, any, BlogInputModel>, res: Response) => {
