@@ -1,5 +1,5 @@
-export type TPaginationOptions = {
-    searchNameTerm: string,
+export type PaginationQueryType = {
+    searchNameTerm: string | null,
     sortBy: string,
     sortDirection: 'asc' | 'desc',
     pageNumber: number,

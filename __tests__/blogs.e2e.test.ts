@@ -23,9 +23,17 @@ describe('tests for /blogs', async () => {
     })
 
     it ('should return 200 and empty array', async () => {
-        await req
+        const res = await req
             .get(SETTINGS.PATH.BLOGS)
-            .expect(HTTP_STATUSES.SUCCESS_200, []);
+            .expect(HTTP_STATUSES.SUCCESS_200);
+
+        expect(res.body).toEqual({
+            pagesCount: 0,
+            page: 1,
+            pageSize: 10,
+            totalCount: 0,
+            items: []
+        })
     })
 
     it ('shouldn\'t create entity 401', async () => {
@@ -40,9 +48,17 @@ describe('tests for /blogs', async () => {
             .send(data)
             .expect(HTTP_STATUSES.UNAUTHORIZED_401);
 
-        await req
+        const res = await req
             .get(SETTINGS.PATH.BLOGS)
-            .expect(HTTP_STATUSES.SUCCESS_200, []);
+            .expect(HTTP_STATUSES.SUCCESS_200);
+
+        expect(res.body).toEqual({
+            pagesCount: 0,
+            page: 1,
+            pageSize: 10,
+            totalCount: 0,
+            items: []
+        })
     })
 
     it ('should create entity', async () => {
@@ -55,8 +71,10 @@ describe('tests for /blogs', async () => {
         const {createdBlog} = await blogsTestManager.createBlog(data);
 
         await req
-            .get(SETTINGS.PATH.BLOGS)
-            .expect(HTTP_STATUSES.SUCCESS_200, [createdBlog]);
+            .get(SETTINGS.PATH.BLOGS + '/' + createdBlog.id)
+            .expect(HTTP_STATUSES.SUCCESS_200, {
+                ...createdBlog
+            });
     })
 
     it ('Should not create an entity with incorrect input data', async () => {
@@ -72,9 +90,17 @@ describe('tests for /blogs', async () => {
         expect(res.body.errorsMessages[1].field).toEqual('description');
         expect(res.body.errorsMessages[2].field).toEqual('websiteUrl');
 
-        await req
+        const response = await req
             .get(SETTINGS.PATH.BLOGS)
-            .expect(HTTP_STATUSES.SUCCESS_200, []);
+            .expect(HTTP_STATUSES.SUCCESS_200);
+
+        expect(response.body).toEqual({
+            pagesCount: 0,
+            page: 1,
+            pageSize: 10,
+            totalCount: 0,
+            items: []
+        })
     })
 
     it('should return 404 for not existing entity', async () => {
@@ -160,8 +186,16 @@ describe('tests for /blogs', async () => {
             .set({"Authorization": 'Basic ' + fromUTF8ToBase64(SETTINGS.CREDENTIALS)})
             .expect(HTTP_STATUSES.NO_CONTENT_204);
 
-        await req
+        const res = await req
             .get(SETTINGS.PATH.BLOGS)
-            .expect(HTTP_STATUSES.SUCCESS_200, []);
+            .expect(HTTP_STATUSES.SUCCESS_200);
+
+        expect(res.body).toEqual({
+            pagesCount: 0,
+            page: 1,
+            pageSize: 10,
+            totalCount: 0,
+            items: []
+        })
     })
 })

@@ -23,10 +23,18 @@ describe('tests for /posts', async () => {
         await postsCollection.drop();
     })
 
-    it('should return 200 and empty array', async () => {
-        await req
+    it('should return 200 and default values', async () => {
+        const res = await req
             .get(SETTINGS.PATH.POSTS)
-            .expect(HTTP_STATUSES.SUCCESS_200, []);
+            .expect(HTTP_STATUSES.SUCCESS_200);
+
+        expect(res.body).toEqual({
+            pagesCount: 0,
+            page: 1,
+            pageSize: 10,
+            totalCount: 0,
+            items: []
+        })
     })
 
     it('shouldn\'t create entity 401', async () => {
@@ -41,9 +49,17 @@ describe('tests for /posts', async () => {
             .send(data)
             .expect(HTTP_STATUSES.UNAUTHORIZED_401);
 
-        await req
+        const res = await req
             .get(SETTINGS.PATH.POSTS)
-            .expect(HTTP_STATUSES.SUCCESS_200, []);
+            .expect(HTTP_STATUSES.SUCCESS_200);
+
+        expect(res.body).toEqual({
+            pagesCount: 0,
+            page: 1,
+            pageSize: 10,
+            totalCount: 0,
+            items: []
+        })
     })
 
     it('should create entity', async () => {
@@ -65,8 +81,10 @@ describe('tests for /posts', async () => {
         const {createdPost} = await postsTestManager.createPost(newPost);
 
         await req
-            .get(SETTINGS.PATH.POSTS)
-            .expect(HTTP_STATUSES.SUCCESS_200, [createdPost]);
+            .get(SETTINGS.PATH.POSTS + '/' + createdPost.id)
+            .expect(HTTP_STATUSES.SUCCESS_200, {
+                ...createdPost
+            });
     })
 
     it('Should not create an entity with incorrect input data', async () => {
@@ -88,9 +106,17 @@ describe('tests for /posts', async () => {
         expect(res.body.errorsMessages[2].field).toEqual('content');
         expect(res.body.errorsMessages[3].field).toEqual('blogId');
 
-        await req
+        const response = await req
             .get(SETTINGS.PATH.POSTS)
-            .expect(HTTP_STATUSES.SUCCESS_200, []);
+            .expect(HTTP_STATUSES.SUCCESS_200);
+
+        expect(response.body).toEqual({
+            pagesCount: 0,
+            page: 1,
+            pageSize: 10,
+            totalCount: 0,
+            items: []
+        })
     })
 
 
@@ -212,8 +238,16 @@ describe('tests for /posts', async () => {
             .set({"Authorization": 'Basic ' + fromUTF8ToBase64(SETTINGS.CREDENTIALS)})
             .expect(HTTP_STATUSES.NO_CONTENT_204);
 
-        await req
+        const res = await req
             .get(SETTINGS.PATH.POSTS)
-            .expect(HTTP_STATUSES.SUCCESS_200, []);
+            .expect(HTTP_STATUSES.SUCCESS_200);
+
+        expect(res.body).toEqual({
+            pagesCount: 0,
+            page: 1,
+            pageSize: 10,
+            totalCount: 0,
+            items: []
+        })
     })
 })
