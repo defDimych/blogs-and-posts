@@ -1,26 +1,22 @@
-import {ExtendedPostViewModel} from "../types/posts-types/PostViewModel";
 import {PostInputModel} from "../types/posts-types/PostInputModel";
-import {postsRepository} from "../repositories/posts-db-repository";
+import {postsRepository} from "../repositories/db-repo/posts-db-repository";
+import {blogsRepository} from "../repositories/db-repo/blogs-db-repository";
 
 export const postsService = {
-    async getAllPosts(): Promise<ExtendedPostViewModel[]> {
-        return await postsRepository.getAllPosts();
-    },
+    async createPost({ title, shortDescription, content, blogId }: PostInputModel): Promise<string> {
+        const foundBlog = await blogsRepository.findBlogById(blogId);
 
-    async createPost({ title, shortDescription, content, blogId }: PostInputModel): Promise<ExtendedPostViewModel | null> {
+        if (!foundBlog) throw new Error('blog for post not found ' + blogId);
+
         const newPost = {
             title,
             shortDescription,
             content,
             blogId,
-            blogName: 'IT-INCUBATOR',
+            blogName: foundBlog.name,
             createdAt: new Date().toISOString()
         }
         return await postsRepository.createPost(newPost);
-    },
-
-    async findPostById(id: string): Promise<ExtendedPostViewModel | null> {
-        return await postsRepository.findPostById(id);
     },
 
     async updatePost(id: string, inputData: PostInputModel): Promise<boolean> {

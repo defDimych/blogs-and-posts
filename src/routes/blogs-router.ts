@@ -5,42 +5,62 @@ import {blogInputValidationMiddlewares} from "../middlewares/blog-input-validati
 import {basicAuthMiddleware} from "../middlewares/auth/basic-auth-middleware";
 import {checkInputErrorsMiddleware} from "../middlewares/check-input-errors-middleware";
 import {blogsService} from "../domain/blogs-service";
-import {postInputValidationMiddlewares} from "../middlewares/post-input-validation-middlewares";
-import {RequestWithParamsAndBody, RequestWithQuery} from "../types/request-types";
+import {RequestWithParamsAndBody, RequestWithParamsAndQuery, RequestWithQuery} from "../types/request-types";
 import {BlogPostInputModel} from "../types/posts-types/BlogPostInputModel";
 import {postsService} from "../domain/posts-service";
-import {blogsRepository} from "../repositories/blogs-db-repository";
-import {TPaginationOptions} from "../types/TPaginationOptions";
+import {PaginationQueryType} from "../types/PaginationQueryType";
+import {getDefaultPaginationOptions} from "./helpers/pagination-helper";
+import {blogPostInputValidationMiddleware} from "../middlewares/blog-post-input-validation-middleware";
+import {blogsQueryRepository} from "../repositories/query-repo/blogs-query-repository";
+import {postsQueryRepository} from "../repositories/query-repo/posts-query-repository";
 
 export const getBlogsRouter = () => {
     const router = express.Router();
 
-    router.get('/', async (req: RequestWithQuery<TPaginationOptions>, res: Response) => {
-        const receivedBlogs = await blogsRepository.getAllBlogs(req.query);
+    router.get('/', async (req: RequestWithQuery<PaginationQueryType>, res: Response) => {
+        const receivedBlogs = await blogsQueryRepository.getAllBlogs(getDefaultPaginationOptions(req.query));
 
         res.status(HTTP_STATUSES.SUCCESS_200).send(receivedBlogs);
     })
+    router.get('/:blogId/posts', async (req: RequestWithParamsAndQuery<{ blogId: string}, PaginationQueryType>, res: Response) => {
+        const foundBlog = await blogsQueryRepository.findBlogById(req.params.blogId);
+
+        if (!foundBlog) {
+            res.sendStatus(HTTP_STATUSES.NOT_FOUND_404);
+            return
+        }
+
+        const receivedPosts = await postsQueryRepository.getAllPostsByBlogId(getDefaultPaginationOptions(req.query), foundBlog.id)
+
+        res.status(HTTP_STATUSES.SUCCESS_200).send(receivedPosts);
+    })
     router.post('/', basicAuthMiddleware, ...blogInputValidationMiddlewares, checkInputErrorsMiddleware,
         async (req: Request<any, any, BlogInputModel>, res: Response) => {
-            const createdBlog = await blogsService.createBlog(req.body);
+            const createdBlogId = await blogsService.createBlog(req.body);
+            const createdBlog = await blogsQueryRepository.findBlogById(createdBlogId)
+
+            if (!createdBlog) return;
+
             res.status(HTTP_STATUSES.CREATED_201).send(createdBlog);
         })
-    router.post('/:blogId/posts', basicAuthMiddleware, ...postInputValidationMiddlewares, checkInputErrorsMiddleware,
+    router.post('/:blogId/posts', basicAuthMiddleware, ...blogPostInputValidationMiddleware, checkInputErrorsMiddleware,
         async (req: RequestWithParamsAndBody<{ blogId: string }, BlogPostInputModel>, res: Response) => {
-        // TODO: Спросить!!!
-            const foundBlog = blogsRepository.findBlogById(req.params.blogId);
+            const foundBlog = await blogsQueryRepository.findBlogById(req.params.blogId);
 
             if (!foundBlog) {
                 res.sendStatus(HTTP_STATUSES.NOT_FOUND_404);
                 return
             }
 
-            const createdPost = await postsService.createPost({ ...req.body, blogId: req.params.blogId });
+            const createdPostId = await postsService.createPost({ ...req.body, blogId: req.params.blogId });
+            const createdPost = await postsQueryRepository.findPostById(createdPostId);
+
+            if (!createdPost) return;
 
             res.status(HTTP_STATUSES.CREATED_201).send(createdPost);
         })
     router.get('/:id', async (req: Request, res: Response) => {
-        const foundBlog = await blogsService.findBlogById(req.params.id);
+        const foundBlog = await blogsQueryRepository.findBlogById(req.params.id);
 
         if (!foundBlog) {
             res.sendStatus(HTTP_STATUSES.NOT_FOUND_404);

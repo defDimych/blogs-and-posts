@@ -1,5 +1,5 @@
 import {body} from "express-validator";
-import {blogsRepository} from "../repositories/blogs-db-repository";
+import {blogsQueryRepository} from "../repositories/query-repo/blogs-query-repository";
 
 export const postInputValidationMiddlewares = [
     body('title')
@@ -24,7 +24,7 @@ export const postInputValidationMiddlewares = [
         .withMessage('Invalid length'),
 
     body('blogId').custom(async blogId => {
-        const foundBlog = await blogsRepository.findBlogById(blogId);
+        const foundBlog = await blogsQueryRepository.findBlogById(blogId);
 
         if (!foundBlog) {
             throw new Error("The blog doesn't exist");
