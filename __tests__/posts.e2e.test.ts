@@ -23,18 +23,119 @@ describe('tests for /posts', async () => {
         await postsCollection.drop();
     })
 
+    const defaultState = {
+        pagesCount: 0,
+        page: 1,
+        pageSize: 10,
+        totalCount: 0,
+        items: []
+    }
+
     it('should return 200 and default values', async () => {
         const res = await req
             .get(SETTINGS.PATH.POSTS)
             .expect(HTTP_STATUSES.SUCCESS_200);
 
-        expect(res.body).toEqual({
-            pagesCount: 0,
-            page: 1,
-            pageSize: 10,
-            totalCount: 0,
-            items: []
+        expect(res.body).toEqual(defaultState)
+    })
+
+    it ('should return status 200 and all posts with paging', async () => {
+        const newBlog = {
+            name: 'n1',
+            description: 'd1',
+            websiteUrl: 'https://it-incubator.io/en'
+        }
+
+        const {createdBlog} = await blogsTestManager.createBlog(newBlog);
+
+        const newPost = {
+            title: 't1',
+            shortDescription: 's1',
+            content: 'c1',
+            blogId: createdBlog.id
+        }
+
+        for (let i = 0; i < 10; i++) {
+            await postsTestManager.createPost(newPost);
+        }
+
+        const queryData = {
+            sortDirection: 'asc',
+            pageNumber: 1,
+            pageSize: 10
+        }
+
+        const res = await req
+            .get(SETTINGS.PATH.POSTS)
+            .query(queryData)
+            .expect(HTTP_STATUSES.SUCCESS_200);
+
+        const sortedPosts = [...res.body.items].sort((a: any, b: any) => {
+            if (a.createdAt > b.createdAt) {
+                return 1;
+            }
+            if (a.createdAt < b.createdAt) {
+                return -1;
+            }
+            return 0;
         })
+
+        expect(res.body.pagesCount).toEqual(Math.ceil(res.body.items.length / queryData.pageSize));
+        expect(res.body.page).toEqual(queryData.pageNumber);
+        expect(res.body.pageSize).toEqual(queryData.pageSize);
+        expect(res.body.totalCount).toEqual(res.body.items.length);
+        expect(res.body.items).toEqual(sortedPosts);
+    })
+
+    it ('should return status 200 and all posts for specified blog with paging', async () => {
+        const newBlog = {
+            name: 'n1',
+            description: 'd1',
+            websiteUrl: 'https://it-incubator.io/en'
+        }
+
+        const {createdBlog} = await blogsTestManager.createBlog(newBlog);
+
+        const newPost = {
+            title: 't1',
+            shortDescription: 's1',
+            content: 'c1',
+            blogId: createdBlog.id
+        }
+
+        for (let i = 0; i < 10; i++) {
+            await postsTestManager.createPost(newPost);
+        }
+
+        const res = await req
+            .get(SETTINGS.PATH.BLOGS + '/' + createdBlog.id + SETTINGS.PATH.POSTS)
+
+        const sortedPosts = [...res.body.items].sort((a: any, b: any) => {
+            if (a.createdAt > b.createdAt) {
+                return 1;
+            }
+            if (a.createdAt < b.createdAt) {
+                return -1;
+            }
+            return 0;
+        })
+
+        const queryData = {
+            sortDirection: 'asc',
+            pageNumber: 1,
+            pageSize: 10
+        }
+
+        const resp = await req
+            .get(SETTINGS.PATH.BLOGS + '/' + createdBlog.id + SETTINGS.PATH.POSTS)
+            .query(queryData)
+            .expect(HTTP_STATUSES.SUCCESS_200);
+
+        expect(resp.body.pagesCount).toEqual(Math.ceil(res.body.items.length / queryData.pageSize));
+        expect(resp.body.page).toEqual(queryData.pageNumber);
+        expect(resp.body.pageSize).toEqual(queryData.pageSize);
+        expect(resp.body.totalCount).toEqual(res.body.items.length);
+        expect(resp.body.items).toEqual(sortedPosts);
     })
 
     it('shouldn\'t create entity 401', async () => {
@@ -53,13 +154,7 @@ describe('tests for /posts', async () => {
             .get(SETTINGS.PATH.POSTS)
             .expect(HTTP_STATUSES.SUCCESS_200);
 
-        expect(res.body).toEqual({
-            pagesCount: 0,
-            page: 1,
-            pageSize: 10,
-            totalCount: 0,
-            items: []
-        })
+        expect(res.body).toEqual(defaultState);
     })
 
     it('should create entity', async () => {
@@ -85,6 +180,16 @@ describe('tests for /posts', async () => {
             .expect(HTTP_STATUSES.SUCCESS_200, {
                 ...createdPost
             });
+
+        // Запрос создания поста для конкретного блога
+        // await req
+        //     .post(SETTINGS.PATH.BLOGS + createdBlog.id + '/posts')
+        //     .send({
+        //         title: 't1',
+        //         shortDescription: 's1',
+        //         content: 'c1'
+        //     })
+        //     .expect(HTTP_STATUSES.CREATED_201);
     })
 
     it('Should not create an entity with incorrect input data', async () => {
@@ -110,13 +215,7 @@ describe('tests for /posts', async () => {
             .get(SETTINGS.PATH.POSTS)
             .expect(HTTP_STATUSES.SUCCESS_200);
 
-        expect(response.body).toEqual({
-            pagesCount: 0,
-            page: 1,
-            pageSize: 10,
-            totalCount: 0,
-            items: []
-        })
+        expect(response.body).toEqual(defaultState);
     })
 
 
@@ -242,12 +341,6 @@ describe('tests for /posts', async () => {
             .get(SETTINGS.PATH.POSTS)
             .expect(HTTP_STATUSES.SUCCESS_200);
 
-        expect(res.body).toEqual({
-            pagesCount: 0,
-            page: 1,
-            pageSize: 10,
-            totalCount: 0,
-            items: []
-        })
+        expect(res.body).toEqual(defaultState);
     })
 })

@@ -23,6 +23,7 @@ export const postsTestManager = {
             expect(res.body.blogId).toEqual(data.blogId);
             expect(typeof res.body.id).toEqual('string');
             expect(typeof res.body.blogName).toEqual('string');
+            expect(typeof res.body.createdAt).toEqual('string');
         }
 
         return {res, createdPost: createdEntity};

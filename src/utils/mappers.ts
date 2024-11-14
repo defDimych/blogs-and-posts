@@ -1,10 +1,12 @@
 import {WithId} from "mongodb";
 import {BlogDbModel} from "../types/blogs-types/BlogDbModel";
-import {ExtendedBlogViewModel} from "../types/blogs-types/BlogViewModel";
+import {BlogViewModel} from "../types/blogs-types/BlogViewModel";
 import {PostDbModel} from "../types/posts-types/PostDbModel";
-import {ExtendedPostViewModel} from "../types/posts-types/PostViewModel";
+import {PostViewModel} from "../types/posts-types/PostViewModel";
+import {UserDbModel} from "../types/users-types/UserDbModel";
+import {UserViewModel} from "../types/users-types/UserViewModel";
 
-export const blogMapper = (blog: WithId<BlogDbModel>): ExtendedBlogViewModel => {
+export const blogMapper = (blog: WithId<BlogDbModel>): BlogViewModel => {
     return {
         id: blog._id.toString(),
         name: blog.name,
@@ -15,7 +17,7 @@ export const blogMapper = (blog: WithId<BlogDbModel>): ExtendedBlogViewModel => 
     }
 }
 
-export const postMapper = (post: WithId<PostDbModel>): ExtendedPostViewModel => {
+export const postMapper = (post: WithId<PostDbModel>): PostViewModel => {
     return {
         id: post._id.toString(),
         title: post.title,
@@ -24,5 +26,14 @@ export const postMapper = (post: WithId<PostDbModel>): ExtendedPostViewModel => 
         blogId: post.blogId,
         blogName: post.blogName,
         createdAt: post.createdAt
+    }
+}
+
+export const userMapper = (user: WithId<UserDbModel>): UserViewModel => {
+    return {
+        id: user._id.toString(),
+        login: user.login,
+        email: user.email,
+        createdAt: user.createdAt
     }
 }

@@ -3,9 +3,6 @@ export interface BlogViewModel {
     name: string
     description: string
     websiteUrl: string
-}
-
-export interface ExtendedBlogViewModel extends BlogViewModel {
-    createdAt?: string,
+    createdAt?: string
     isMembership?: boolean
 }

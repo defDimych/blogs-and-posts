@@ -4,9 +4,6 @@ export type PostViewModel = {
     shortDescription: string,
     content: string,
     blogId: string,
-    blogName: string
-}
-
-export interface ExtendedPostViewModel extends PostViewModel {
-    createdAt?: string,
+    blogName: string,
+    createdAt?: string
 }

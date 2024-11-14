@@ -1,5 +1,5 @@
 export type ErrorsViewModel = {
-    errorsMessages: ErrorModel[] | null
+    errorsMessages: ErrorModel[]
 }
 
 type ErrorModel = {

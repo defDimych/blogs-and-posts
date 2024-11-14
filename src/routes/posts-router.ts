@@ -14,7 +14,8 @@ export const getPostsRouter = () => {
     const router = express.Router();
 
     router.get('/', async (req: RequestWithQuery<PaginationQueryType>, res: Response) => {
-        const receivedPosts = await postsQueryRepository.getAllPosts(getDefaultPaginationOptions(req.query))
+        const sorting:PaginationQueryType = req.query
+        const receivedPosts = await postsQueryRepository.getAllPosts(getDefaultPaginationOptions(sorting))
 
         res.status(HTTP_STATUSES.SUCCESS_200).send(receivedPosts);
     })

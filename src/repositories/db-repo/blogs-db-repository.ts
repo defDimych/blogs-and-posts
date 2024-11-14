@@ -2,8 +2,6 @@ import {BlogInputModel} from "../../types/blogs-types/BlogInputModel";
 import {blogsCollection} from "../db";
 import {BlogDbModel} from "../../types/blogs-types/BlogDbModel";
 import {ObjectId, WithId} from "mongodb";
-import {ExtendedBlogViewModel} from "../../types/blogs-types/BlogViewModel";
-import {blogMapper} from "../../utils/blogs-and-posts-mapper";
 
 export const blogsRepository = {
     async findBlogById(id: string): Promise<WithId<BlogDbModel> | null> {

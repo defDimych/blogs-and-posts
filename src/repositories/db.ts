@@ -1,10 +1,12 @@
 import {Collection, MongoClient} from "mongodb";
 import {BlogDbModel} from "../types/blogs-types/BlogDbModel";
 import {PostDbModel} from "../types/posts-types/PostDbModel";
+import {UserDbModel} from "../types/users-types/UserDbModel";
 
 // Collections
 export let blogsCollection: Collection<BlogDbModel>
 export let postsCollection: Collection<PostDbModel>
+export let usersCollection: Collection<UserDbModel>
 
 export async function runDb(url: string) {
     const client = new MongoClient(url);
@@ -12,6 +14,7 @@ export async function runDb(url: string) {
 
     blogsCollection = db.collection('blogs');
     postsCollection = db.collection('posts');
+    usersCollection = db.collection('users');
 
     try {
         await client.connect();

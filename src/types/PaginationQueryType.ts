@@ -1,7 +1,9 @@
 export type PaginationQueryType = {
-    searchNameTerm: string | null,
+    searchNameTerm?: string ,
+    searchLoginTerm?: string,
+    searchEmailTerm?: string,
     sortBy: string,
-    sortDirection: 'asc' | 'desc',
-    pageNumber: number,
-    pageSize: number
+    sortDirection:string,
+    pageNumber: string,
+    pageSize: string
 }
