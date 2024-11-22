@@ -1,8 +1,8 @@
 import {req} from "./test-helpers";
-import {SETTINGS} from "../src/utils/settings";
-import {fromUTF8ToBase64} from "../src/middlewares/auth/basic-auth-middleware";
-import {HTTP_STATUSES, HttpStatusType} from "../src/utils/http-statuses";
-import {PostInputModel} from "../src/types/posts-types/PostInputModel";
+import {SETTINGS} from "../../src/utils/settings";
+import {fromUTF8ToBase64} from "../../src/middlewares/auth/basic-auth-middleware";
+import {HTTP_STATUSES, HttpStatusType} from "../../src/utils/http-statuses";
+import {PostInputModel} from "../../src/types/posts-types/PostInputModel";
 
 export const postsTestManager = {
     async createPost(data: PostInputModel, expectedStatusCode: HttpStatusType = HTTP_STATUSES.CREATED_201) {

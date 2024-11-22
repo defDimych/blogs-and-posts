@@ -5,6 +5,9 @@ import {PostDbModel} from "../types/posts-types/PostDbModel";
 import {PostViewModel} from "../types/posts-types/PostViewModel";
 import {UserDbModel} from "../types/users-types/UserDbModel";
 import {UserViewModel} from "../types/users-types/UserViewModel";
+import {MeInfoViewModel} from "../types/users-types/MeInfoViewModel";
+import {CommentDbModel} from "../types/comments-type/CommentDbModel";
+import {CommentViewModel} from "../types/comments-type/CommentViewModel";
 
 export const blogMapper = (blog: WithId<BlogDbModel>): BlogViewModel => {
     return {
@@ -35,5 +38,25 @@ export const userMapper = (user: WithId<UserDbModel>): UserViewModel => {
         login: user.login,
         email: user.email,
         createdAt: user.createdAt
+    }
+}
+
+export const meInfoMapper = (user: WithId<UserDbModel>): MeInfoViewModel => {
+    return {
+        userId: user._id.toString(),
+        email: user.email,
+        login: user.login
+    }
+}
+
+export const commentMapper = (comment: WithId<CommentDbModel>): CommentViewModel => {
+    return {
+        id: comment._id.toString(),
+        commentatorInfo: {
+            userId: comment.commentatorInfo.userId,
+            userLogin: comment.commentatorInfo.userLogin
+        },
+        content: comment.content,
+        createdAt: comment.createdAt
     }
 }

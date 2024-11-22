@@ -1,8 +1,8 @@
-import {BlogInputModel} from "../src/types/blogs-types/BlogInputModel";
+import {BlogInputModel} from "../../src/types/blogs-types/BlogInputModel";
 import {req} from "./test-helpers";
-import {SETTINGS} from "../src/utils/settings";
-import {fromUTF8ToBase64} from "../src/middlewares/auth/basic-auth-middleware";
-import {HTTP_STATUSES, HttpStatusType} from "../src/utils/http-statuses";
+import {SETTINGS} from "../../src/utils/settings";
+import {fromUTF8ToBase64} from "../../src/middlewares/auth/basic-auth-middleware";
+import {HTTP_STATUSES, HttpStatusType} from "../../src/utils/http-statuses";
 
 export const blogsTestManager = {
     async createBlog(data: BlogInputModel, expectedStatusCode: HttpStatusType = HTTP_STATUSES.CREATED_201) {

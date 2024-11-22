@@ -8,21 +8,8 @@ import {HTTP_STATUSES} from "../utils/http-statuses";
 import {UserInputModel} from "../types/users-types/UserInputModel";
 import {userInputValidationMiddleware} from "../middlewares/user-input-validation-middleware";
 import {checkInputErrorsMiddleware} from "../middlewares/check-input-errors-middleware";
-import {DomainStatusCode, usersService} from "../domain/users-service";
-
-// const isSuccess = <T>(result: Result<T | null>): result is Result<T> => {
-//     return true
-// }
-
-const handleError = (status: DomainStatusCode): number => {
-    switch (status) {
-        case DomainStatusCode.BadRequest:
-        case DomainStatusCode.EmailNotSend:
-            return HTTP_STATUSES.BAD_REQUEST_400
-        default:
-            return 500
-    }
-}
+import {usersService} from "../domain/users-service";
+import {DomainStatusCode, handleError} from "../utils/object-result";
 
 export const getUsersRouter = () => {
     const router = express.Router();
@@ -33,20 +20,11 @@ export const getUsersRouter = () => {
         res.status(HTTP_STATUSES.SUCCESS_200).send(receivedUsers);
     })
     router.post('/', basicAuthMiddleware, ...userInputValidationMiddleware, checkInputErrorsMiddleware,
-        async (req: RequestWithBody<UserInputModel>, res: Response, next) => {
-        try{
-            //const checkResult = await usersService.checkUnique(req.body.login, req.body.email);
-
-            // if (checkResult.errorsMessages.length) {
-            //     res.status(HTTP_STATUSES.BAD_REQUEST_400).send(checkResult);
-            //     return;
-            // }
-
+        async (req: RequestWithBody<UserInputModel>, res: Response) => {
             const result = await usersService.createUser(req.body.login, req.body.password, req.body.email);
 
-            if(result.status !== DomainStatusCode.Success) {
+            if (result.status !== DomainStatusCode.Success) {
                 res.status(handleError(result.status)).send(result.extensions)
-
                 return
             }
 
@@ -55,10 +33,6 @@ export const getUsersRouter = () => {
             if (!createdUser) throw new Error('sww');
 
             res.status(HTTP_STATUSES.CREATED_201).send(createdUser);
-        } catch (e) {
-            next(e)
-        }
-
     })
     router.delete('/:id', basicAuthMiddleware, async (req: RequestWithParams<{id: string}>, res: Response) => {
         const foundUser = await usersQueryRepository.findUserById(req.params.id);

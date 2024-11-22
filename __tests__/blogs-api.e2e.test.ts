@@ -1,9 +1,9 @@
 import {describe} from "node:test";
-import {req} from "./test-helpers";
+import {req} from "./helpers/test-helpers";
 import {SETTINGS} from "../src/utils/settings";
 import {HTTP_STATUSES} from "../src/utils/http-statuses";
 import {fromUTF8ToBase64} from "../src/middlewares/auth/basic-auth-middleware";
-import {blogsTestManager} from "./blogsTestManager";
+import {blogsTestManager} from "./helpers/blogsTestManager";
 import {MongoMemoryServer} from "mongodb-memory-server";
 import {blogsCollection, runDb} from "../src/repositories/db";
 import {ObjectId} from "mongodb";
