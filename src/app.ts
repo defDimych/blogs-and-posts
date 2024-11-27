@@ -20,3 +20,4 @@ app.use(SETTINGS.PATH.POSTS, getPostsRouter());
 app.use(SETTINGS.PATH.USERS, getUsersRouter());
 app.use(SETTINGS.PATH.TESTS, getTestingRouter());
 app.use(SETTINGS.PATH.COMMENTS, getCommentsRouter());
+

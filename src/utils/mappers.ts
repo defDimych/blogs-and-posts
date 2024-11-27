@@ -35,17 +35,17 @@ export const postMapper = (post: WithId<PostDbModel>): PostViewModel => {
 export const userMapper = (user: WithId<UserDbModel>): UserViewModel => {
     return {
         id: user._id.toString(),
-        login: user.login,
-        email: user.email,
-        createdAt: user.createdAt
+        login: user.accountData.login,
+        email: user.accountData.email,
+        createdAt: user.accountData.createdAt
     }
 }
 
 export const meInfoMapper = (user: WithId<UserDbModel>): MeInfoViewModel => {
     return {
         userId: user._id.toString(),
-        email: user.email,
-        login: user.login
+        email: user.accountData.email,
+        login: user.accountData.login
     }
 }
 

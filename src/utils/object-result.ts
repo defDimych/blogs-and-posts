@@ -22,7 +22,7 @@ export const handleError = (status: DomainStatusCode): number => {
 
 export type Result<Data> = {
     status: DomainStatusCode;
-    extensions: ErrorsViewModel | [];
+    extensions?: ErrorsViewModel | [];
     data: Data | null
 }
 
@@ -35,7 +35,7 @@ export enum DomainStatusCode {
     EmailNotSend = 50
 }
 
-export const objectResult = {
+export const domainStatusResponse = {
     success<T>(data: T): Result<T> {
         return {
             status: DomainStatusCode.Success,
@@ -44,11 +44,11 @@ export const objectResult = {
         }
     },
 
-    unauthorized(): Result<null> {
+    unauthorized(errorMessages?: ErrorsViewModel): Result<null> {
         return {
             status: DomainStatusCode.Unauthorized,
             data: null,
-            extensions: []
+            extensions: errorMessages
         }
     },
 
@@ -65,6 +65,14 @@ export const objectResult = {
             status: DomainStatusCode.Forbidden,
             data: null,
             extensions: []
+        }
+    },
+
+    badRequest(errorMessages?: ErrorsViewModel): Result<null> {
+        return {
+            status: DomainStatusCode.BadRequest,
+            data: null,
+            extensions: errorMessages
         }
     }
 }

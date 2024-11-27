@@ -3,6 +3,6 @@ export type ErrorsViewModel = {
 }
 
 type ErrorModel = {
-    message: string | null,
-    field: string | null
+    message: string,
+    field?: string
 }

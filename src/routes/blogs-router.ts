@@ -1,7 +1,7 @@
 import express, {Request, Response} from "express";
 import {HTTP_STATUSES} from "../utils/http-statuses";
 import {BlogInputModel} from "../types/blogs-types/BlogInputModel";
-import {blogInputValidationMiddlewares} from "../middlewares/blog-input-validation-middlewares";
+import {blogInputValidationMiddlewares} from "../middlewares/validation/blog-input-validation-middlewares";
 import {basicAuthMiddleware} from "../middlewares/auth/basic-auth-middleware";
 import {checkInputErrorsMiddleware} from "../middlewares/check-input-errors-middleware";
 import {blogsService} from "../domain/blogs-service";
@@ -10,7 +10,7 @@ import {BlogPostInputModel} from "../types/posts-types/BlogPostInputModel";
 import {postsService} from "../domain/posts-service";
 import {PaginationQueryType} from "../types/PaginationQueryType";
 import {getDefaultPaginationOptions} from "./helpers/pagination-helper";
-import {blogPostInputValidationMiddleware} from "../middlewares/blog-post-input-validation-middleware";
+import {blogPostInputValidationMiddleware} from "../middlewares/validation/blog-post-input-validation-middleware";
 import {blogsQueryRepository} from "../repositories/query-repo/blogs-query-repository";
 import {postsQueryRepository} from "../repositories/query-repo/posts-query-repository";
 

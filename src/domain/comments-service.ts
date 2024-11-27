@@ -1,5 +1,5 @@
 import {commentsRepository} from "../repositories/db-repo/comments-db-repository";
-import {objectResult} from "../utils/object-result";
+import {domainStatusResponse} from "../utils/object-result";
 import {postsRepository} from "../repositories/db-repo/posts-db-repository";
 import {usersDbRepository} from "../repositories/db-repo/users-db-repository";
 
@@ -8,16 +8,16 @@ export const commentsService = {
         const foundComment = await commentsRepository.findCommentById(commentId);
 
         if (!foundComment) {
-            return objectResult.notFound();
+            return domainStatusResponse.notFound();
         }
-        return objectResult.success(null);
+        return domainStatusResponse.success(null);
     },
 
     async createComment(postId: string, content: string, userId: string) {
         const isFound = await postsRepository.findPostById(postId);
 
         if (!isFound) {
-            return objectResult.notFound();
+            return domainStatusResponse.notFound();
         }
 
         const user = await usersDbRepository.findUserById(userId);
@@ -27,24 +27,24 @@ export const commentsService = {
             content,
             commentatorInfo: {
                 userId: user._id.toString(),
-                userLogin: user.login
+                userLogin: user.accountData.login
             },
             createdAt: new Date().toISOString()
         }
         const savedCommentId = await commentsRepository.saveComment(newComment);
 
-        return objectResult.success(savedCommentId);
+        return domainStatusResponse.success(savedCommentId);
     },
 
     async updateComment(userId: string, commentId: string, content: string) {
         const foundComment = await commentsRepository.findCommentById(commentId);
 
         if (!foundComment) {
-            return objectResult.notFound()
+            return domainStatusResponse.notFound()
         }
 
         if (foundComment.commentatorInfo.userId !== userId) {
-            return objectResult.forbidden()
+            return domainStatusResponse.forbidden()
         }
 
         const isUpdated = await commentsRepository.updateComment(commentId, content);
@@ -53,18 +53,18 @@ export const commentsService = {
             throw new Error(`Failed to update comment by id: ${commentId}`);
         }
 
-        return objectResult.success(null);
+        return domainStatusResponse.success(null);
     },
 
     async deleteComment(userId: string, commentId: string) {
         const foundComment = await commentsRepository.findCommentById(commentId);
 
         if (!foundComment) {
-            return objectResult.notFound()
+            return domainStatusResponse.notFound()
         }
 
         if (foundComment.commentatorInfo.userId !== userId) {
-            return objectResult.forbidden()
+            return domainStatusResponse.forbidden()
         }
 
         const isDeleted = await commentsRepository.deleteComment(commentId);
@@ -73,6 +73,6 @@ export const commentsService = {
             throw new Error(`Failed to delete comment by id: ${commentId}`);
         }
 
-        return objectResult.success(null);
+        return domainStatusResponse.success(null);
     }
 }

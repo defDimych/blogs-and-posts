@@ -1,11 +1,11 @@
-import express, {Response} from "express";
+import express, {Request, Response} from "express";
 import {HTTP_STATUSES} from "../utils/http-statuses";
 import {blogsCollection, commentsCollection, postsCollection, usersCollection} from "../repositories/db";
 
 export const getTestingRouter = () => {
     const router = express.Router();
 
-    router.delete('/', async (res: Response) => {
+    router.delete('/', async (req: Request, res: Response) => {
         await blogsCollection.drop();
         await postsCollection.drop();
         await usersCollection.drop();

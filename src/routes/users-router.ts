@@ -6,7 +6,7 @@ import {usersQueryRepository} from "../repositories/query-repo/users-query-repos
 import {getDefaultPaginationOptions} from "./helpers/pagination-helper";
 import {HTTP_STATUSES} from "../utils/http-statuses";
 import {UserInputModel} from "../types/users-types/UserInputModel";
-import {userInputValidationMiddleware} from "../middlewares/user-input-validation-middleware";
+import {userInputValidationMiddleware} from "../middlewares/validation/user-input-validation-middleware";
 import {checkInputErrorsMiddleware} from "../middlewares/check-input-errors-middleware";
 import {usersService} from "../domain/users-service";
 import {DomainStatusCode, handleError} from "../utils/object-result";

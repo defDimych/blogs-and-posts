@@ -15,18 +15,38 @@ export const usersDbRepository = {
     async findLoginOrEmail(loginOrEmail: string) {
         return usersCollection.findOne({
             $or: [
-                {login: loginOrEmail},
-                {email: loginOrEmail}
+                {"accountData.login": loginOrEmail},
+                {"accountData.email": loginOrEmail}
             ]
         })
     },
 
+    async findUserByConfirmationCode(code: string) {
+        return await usersCollection.findOne({"emailConfirmation.confirmationCode": code});
+    },
+
     async findLogin(login: string) {
-        return await usersCollection.findOne({ login });
+        return await usersCollection.findOne({"accountData.login": login});
     },
 
     async findEmail(email: string) {
-        return await usersCollection.findOne({ email });
+        return await usersCollection.findOne({"accountData.email": email});
+    },
+
+    async updateConfirmation(id: string) {
+        const result = await usersCollection.updateOne(
+            { _id: new ObjectId(id) },
+            { $set: {"emailConfirmation.isConfirmed": true} }
+        );
+        return result.modifiedCount === 1;
+    },
+
+    async updateConfirmationCode(id: string, newConfirmationCode: string) {
+        const result = await usersCollection.updateOne(
+            { _id: new ObjectId(id) },
+            { $set: {"emailConfirmation.confirmationCode": newConfirmationCode} }
+        );
+        return result.modifiedCount === 1;
     },
 
     async saveUser(user: UserDbModel) {

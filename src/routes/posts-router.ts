@@ -9,13 +9,13 @@ import {
     RequestWithQuery
 } from "../types/request-types";
 import {PostInputModel} from "../types/posts-types/PostInputModel";
-import {postInputValidationMiddlewares} from "../middlewares/post-input-validation-middlewares";
+import {postInputValidationMiddlewares} from "../middlewares/validation/post-input-validation-middlewares";
 import {postsService} from "../domain/posts-service";
 import {PaginationQueryType} from "../types/PaginationQueryType";
 import {getDefaultPaginationOptions} from "./helpers/pagination-helper";
 import {postsQueryRepository} from "../repositories/query-repo/posts-query-repository";
 import {authentication} from "../middlewares/auth/authentication ";
-import {commentInputValidationMiddleware} from "../middlewares/comment-input-validation-middleware";
+import {commentInputValidationMiddleware} from "../middlewares/validation/comment-input-validation-middleware";
 import {CommentInputModel} from "../types/comments-type/CommentInputModel";
 import {DomainStatusCode, handleError} from "../utils/object-result";
 import {commentsQueryRepository} from "../repositories/query-repo/comments-query-repository";

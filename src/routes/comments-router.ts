@@ -1,6 +1,6 @@
 import express, {Response} from "express";
 import {authentication} from "../middlewares/auth/authentication ";
-import {commentInputValidationMiddleware} from "../middlewares/comment-input-validation-middleware";
+import {commentInputValidationMiddleware} from "../middlewares/validation/comment-input-validation-middleware";
 import {RequestWithParams, RequestWithParamsAndBody} from "../types/request-types";
 import {CommentInputModel} from "../types/comments-type/CommentInputModel";
 import {commentsService} from "../domain/comments-service";
