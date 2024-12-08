@@ -7,11 +7,13 @@ import cors from "cors";
 import {getUsersRouter} from "./routes/users-router";
 import {getAuthRouter} from "./routes/auth-router";
 import {getCommentsRouter} from "./routes/comments-router";
+import cookieParser from "cookie-parser";
 
 // Create app
 export const app = express();
 
 app.use(express.json());
+app.use(cookieParser());
 app.use(cors())
 
 app.use(SETTINGS.PATH.AUTH, getAuthRouter());

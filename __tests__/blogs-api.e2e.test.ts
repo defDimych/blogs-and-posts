@@ -1,5 +1,5 @@
 import {describe} from "node:test";
-import {req} from "./helpers/test-helpers";
+import {paginationTestHelper, req} from "./helpers/test-helpers";
 import {SETTINGS} from "../src/utils/settings";
 import {HTTP_STATUSES} from "../src/utils/http-statuses";
 import {fromUTF8ToBase64} from "../src/middlewares/auth/basic-auth-middleware";
@@ -40,7 +40,7 @@ describe('tests for /blogs', async () => {
 
     it ('should return status 200 and all blogs with paging', async () => {
         const data = {
-            name: 'Dmitriy',
+            name: 'Back-end',
             description: 'd1',
             websiteUrl: 'https://it-incubator.io/en'
         }
@@ -49,36 +49,15 @@ describe('tests for /blogs', async () => {
             await blogsTestManager.createBlog(data);
         }
 
-        const res = await req.get(SETTINGS.PATH.BLOGS);
-
         const queryData = {
-            searchNameTerm: 'Mit',
+            searchNameTerm: 'End',
             sortBy: '',
             sortDirection: 'asc',
-            pageNumber: 1,
-            pageSize: 10
+            pageNumber: "1",
+            pageSize: "10"
         }
 
-        const sortedBlogs = [...res.body.items].sort((a: any, b: any) => {
-            if (a.createdAt > b.createdAt) {
-                return 1;
-            }
-            if (a.createdAt < b.createdAt) {
-                return -1;
-            }
-            return 0;
-        })
-
-        const resp = await req
-            .get(SETTINGS.PATH.BLOGS)
-            .query(queryData)
-            .expect(HTTP_STATUSES.SUCCESS_200);
-
-        expect(resp.body.pagesCount).toEqual(Math.ceil(res.body.items.length / queryData.pageSize));
-        expect(resp.body.page).toEqual(queryData.pageNumber);
-        expect(resp.body.pageSize).toEqual(queryData.pageSize);
-        expect(resp.body.totalCount).toEqual(sortedBlogs.length);
-        expect(resp.body.items).toEqual(sortedBlogs);
+        await paginationTestHelper(queryData, SETTINGS.PATH.BLOGS);
     })
 
     it ('shouldn\'t create entity 401', async () => {

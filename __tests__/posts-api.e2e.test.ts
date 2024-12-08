@@ -1,5 +1,5 @@
 import {describe} from "node:test";
-import {req} from "./helpers/test-helpers";
+import {paginationTestHelper, req} from "./helpers/test-helpers";
 import {SETTINGS} from "../src/utils/settings";
 import {HTTP_STATUSES} from "../src/utils/http-statuses";
 import {fromUTF8ToBase64} from "../src/middlewares/auth/basic-auth-middleware";
@@ -60,31 +60,12 @@ describe('tests for /posts', async () => {
         }
 
         const queryData = {
+            sortBy: '',
             sortDirection: 'asc',
-            pageNumber: 1,
-            pageSize: 10
+            pageNumber: "1",
+            pageSize: "10"
         }
-
-        const res = await req
-            .get(SETTINGS.PATH.POSTS)
-            .query(queryData)
-            .expect(HTTP_STATUSES.SUCCESS_200);
-
-        const sortedPosts = [...res.body.items].sort((a: any, b: any) => {
-            if (a.createdAt > b.createdAt) {
-                return 1;
-            }
-            if (a.createdAt < b.createdAt) {
-                return -1;
-            }
-            return 0;
-        })
-
-        expect(res.body.pagesCount).toEqual(Math.ceil(res.body.items.length / queryData.pageSize));
-        expect(res.body.page).toEqual(queryData.pageNumber);
-        expect(res.body.pageSize).toEqual(queryData.pageSize);
-        expect(res.body.totalCount).toEqual(res.body.items.length);
-        expect(res.body.items).toEqual(sortedPosts);
+        await paginationTestHelper(queryData, SETTINGS.PATH.POSTS);
     })
 
     it ('should return status 200 and all posts for specified blog with paging', async () => {
@@ -107,35 +88,13 @@ describe('tests for /posts', async () => {
             await postsTestManager.createPost(newPost);
         }
 
-        const res = await req
-            .get(SETTINGS.PATH.BLOGS + '/' + createdBlog.id + SETTINGS.PATH.POSTS)
-
-        const sortedPosts = [...res.body.items].sort((a: any, b: any) => {
-            if (a.createdAt > b.createdAt) {
-                return 1;
-            }
-            if (a.createdAt < b.createdAt) {
-                return -1;
-            }
-            return 0;
-        })
-
         const queryData = {
+            sortBy: '',
             sortDirection: 'asc',
-            pageNumber: 1,
-            pageSize: 10
+            pageNumber: "1",
+            pageSize: "10"
         }
-
-        const resp = await req
-            .get(SETTINGS.PATH.BLOGS + '/' + createdBlog.id + SETTINGS.PATH.POSTS)
-            .query(queryData)
-            .expect(HTTP_STATUSES.SUCCESS_200);
-
-        expect(resp.body.pagesCount).toEqual(Math.ceil(res.body.items.length / queryData.pageSize));
-        expect(resp.body.page).toEqual(queryData.pageNumber);
-        expect(resp.body.pageSize).toEqual(queryData.pageSize);
-        expect(resp.body.totalCount).toEqual(res.body.items.length);
-        expect(resp.body.items).toEqual(sortedPosts);
+        await paginationTestHelper(queryData, SETTINGS.PATH.BLOGS + '/' + createdBlog.id + SETTINGS.PATH.POSTS);
     })
 
     it('shouldn\'t create entity 401', async () => {
@@ -180,16 +139,6 @@ describe('tests for /posts', async () => {
             .expect(HTTP_STATUSES.SUCCESS_200, {
                 ...createdPost
             });
-
-        // Запрос создания поста для конкретного блога
-        // await req
-        //     .post(SETTINGS.PATH.BLOGS + createdBlog.id + '/posts')
-        //     .send({
-        //         title: 't1',
-        //         shortDescription: 's1',
-        //         content: 'c1'
-        //     })
-        //     .expect(HTTP_STATUSES.CREATED_201);
     })
 
     it('Should not create an entity with incorrect input data', async () => {

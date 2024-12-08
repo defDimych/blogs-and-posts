@@ -1,4 +1,4 @@
-import {req} from "./helpers/test-helpers";
+import {paginationTestHelper, req} from "./helpers/test-helpers";
 import {SETTINGS} from "../src/utils/settings";
 import {fromUTF8ToBase64} from "../src/middlewares/auth/basic-auth-middleware";
 import {HTTP_STATUSES} from "../src/utils/http-statuses";
@@ -48,7 +48,7 @@ describe('tests for /users', () => {
         await usersTestManager.createUser(data);
     })
 
-    it("shouldn't create a user if email and login are not unique", async () => {
+    it("shouldn't create a entity if email and login are not unique", async () => {
         const dataForNewUser1 = {
             email: 'example@example.com',
             login: 'backend777',

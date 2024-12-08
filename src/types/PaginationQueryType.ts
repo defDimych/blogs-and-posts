@@ -4,6 +4,6 @@ export type PaginationQueryType = {
     searchEmailTerm?: string,
     sortBy: string,
     sortDirection:string,
-    pageNumber: string,
-    pageSize: string
+    pageNumber: string;
+    pageSize: string;
 }

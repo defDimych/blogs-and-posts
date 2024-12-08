@@ -3,28 +3,49 @@ import {UserDbModel} from "../types/users-types/UserDbModel";
 import jwt from "jsonwebtoken";
 import {SETTINGS} from "../utils/settings";
 
-interface tokenInterface {
+interface TokenInterface {
     userId: string;
     iat: number;
     exp: number;
+    deviceId:string
 }
 
 export const jwtService = {
-    async createJWT(user: WithId<UserDbModel>) {
-        const token = jwt.sign(
-            {userId: user._id}, SETTINGS.JWT_SECRET, {expiresIn: '30d'}
+    createJWTs(user: WithId<UserDbModel>) {
+        const accessToken = jwt.sign(
+            {userId: user._id}, SETTINGS.ACCESS_TOKEN_SECRET, {expiresIn: 10}
+        );
+        const refreshToken = jwt.sign(
+            {userId: user._id,deviceId:crypto.randomUUID()}, SETTINGS.REFRESH_TOKEN_SECRET, {expiresIn: 20}
         );
 
         return {
-            accessToken: token
+            accessToken: {
+                accessToken
+            },
+            refreshToken
         }
     },
 
-    async getUserIdByToken(token: string) {
-        try {
-            const result = jwt.verify(token, SETTINGS.JWT_SECRET);
+    getPayloadFromToken(token: string) {
+        return jwt.decode(token ) as TokenInterface;
+    },
 
-            return (result as tokenInterface).userId
+    verifyRefreshToken(refreshToken: string) {
+        try {
+            const result = jwt.verify(refreshToken, SETTINGS.REFRESH_TOKEN_SECRET);
+
+            return result as TokenInterface
+        } catch (err) {
+            return null;
+        }
+    },
+
+    getUserIdByToken(token: string) {
+        try {
+            const result = jwt.verify(token, SETTINGS.ACCESS_TOKEN_SECRET);
+
+            return (result as TokenInterface).userId
 
         } catch (error) {
             return null;

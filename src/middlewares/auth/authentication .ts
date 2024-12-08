@@ -11,7 +11,7 @@ export const authentication = async (req: Request, res: Response, next: NextFunc
     }
 
     const token = authHeader.split(' ')[1]
-    const userId = await jwtService.getUserIdByToken(token);
+    const userId = jwtService.getUserIdByToken(token);
 
     if (!userId) {
         res.sendStatus(HTTP_STATUSES.UNAUTHORIZED_401);

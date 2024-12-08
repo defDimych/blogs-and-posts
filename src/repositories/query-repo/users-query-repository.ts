@@ -11,7 +11,8 @@ export const usersQueryRepository = {
         const filter = {
             $or: [
                 {login: { $regex: options.searchLoginTerm ?? '', $options: 'i'}},
-                {email: { $regex: options.searchEmailTerm ?? '', $options: 'i'}}
+                {email: { $regex: options.searchEmailTerm ?? '', $options: 'i'}},
+                {}
             ]
         }
 

@@ -1,6 +1,12 @@
 import express, {Request, Response} from "express";
 import {HTTP_STATUSES} from "../utils/http-statuses";
-import {blogsCollection, commentsCollection, postsCollection, usersCollection} from "../repositories/db";
+import {
+    blogsCollection,
+    commentsCollection,
+    postsCollection,
+    refreshTokenVersionCollection,
+    usersCollection
+} from "../repositories/db";
 
 export const getTestingRouter = () => {
     const router = express.Router();
@@ -10,6 +16,7 @@ export const getTestingRouter = () => {
         await postsCollection.drop();
         await usersCollection.drop();
         await commentsCollection.drop();
+        await refreshTokenVersionCollection.drop();
 
         res.sendStatus(HTTP_STATUSES.NO_CONTENT_204);
     })
