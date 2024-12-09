@@ -1,63 +1,62 @@
-import {usersService} from "./users-service";
-import {WithId} from "mongodb";
-import {UserDbModel} from "../types/users-types/UserDbModel";
 import {jwtService} from "../application/jwt-service";
 import {authRepository} from "../repositories/db-repo/auth-db-repository";
-import {domainStatusResponse} from "../utils/object-result";
-import {usersDbRepository} from "../repositories/db-repo/users-db-repository";
+import {DomainStatusCode, responseFactory, Result} from "../utils/object-result";
+import {usersRepository} from "../repositories/db-repo/users-db-repository";
+import bcrypt from "bcrypt";
+import {generateErrorMessage} from "../utils/mappers";
 
 export const authService = {
     async checkCredentials(loginOrEmail: string, password: string) {
-        return await usersService.checkCredentials(loginOrEmail, password);
+        const foundUser = await usersRepository.findUserByLoginOrEmail(loginOrEmail);
+
+        if (!foundUser) {
+            return responseFactory.unauthorized();
+        }
+
+        if (!foundUser.emailConfirmation.isConfirmed) {
+            return responseFactory.unauthorized(generateErrorMessage('Check your email'));
+        }
+
+        const match = await bcrypt.compare(password, foundUser.accountData.passwordHash);
+
+        if (!match) {
+            return responseFactory.unauthorized();
+        }
+        return responseFactory.success<{userId: string}>({userId:foundUser._id.toString()});
     },
 
-    async getTokens(user: WithId<UserDbModel>) {
-        const tokens = jwtService.createJWTs(user);
-        const refreshPayload = jwtService.getPayloadFromToken(tokens.refreshToken);
+    async login(loginOrEmail: string, password: string) {
+        const result = await this.checkCredentials(loginOrEmail, password);
 
-        await authRepository.saveRefreshTokenVersion(refreshPayload.iat, refreshPayload.userId,refreshPayload.deviceId);
+        if (result.status !== DomainStatusCode.Success) {
+            return result as Result<null>
+        }
 
-        return domainStatusResponse.success(tokens);
+        const userId = result.data!.userId;
+        const tokens = jwtService.createJWTs(userId);
+        const decodedPayload = jwtService.getPayloadFromToken(tokens.refreshToken);
+
+        await authRepository.saveRefreshTokenVersion(decodedPayload.iat, decodedPayload.userId,decodedPayload.deviceId);
+
+        return responseFactory.success(tokens);
     },
 
     async updateTokens(refreshToken: string) {
-        const decodedPayload = jwtService.verifyRefreshToken(refreshToken);
+        const decodedPayload = jwtService.getPayloadFromToken(refreshToken);
 
-        if (!decodedPayload) {
-            return domainStatusResponse.unauthorized()
-        }
-
-        const result = await authRepository.checkRefreshTokenVersion(decodedPayload.iat, decodedPayload.userId,decodedPayload.deviceId);
-
-        if (!result) {
-            return domainStatusResponse.unauthorized()
-        }
-
-        const user = await usersDbRepository.findUserById(decodedPayload.userId);
-
-        const tokens = jwtService.createJWTs(user);
+        const tokens = jwtService.createJWTs(decodedPayload.userId);
         const refreshPayload = jwtService.getPayloadFromToken(tokens.refreshToken);
 
         await authRepository.updateRefreshTokenVersion(refreshPayload.iat, refreshPayload.userId,refreshPayload.deviceId);
 
-        return domainStatusResponse.success(tokens);
+        return responseFactory.success(tokens);
     },
 
     async logout(refreshToken: string) {
-        const decodedPayload = jwtService.verifyRefreshToken(refreshToken);
-
-        if (!decodedPayload) {
-            return domainStatusResponse.unauthorized()
-        }
-
-        const result = await authRepository.checkRefreshTokenVersion(decodedPayload.iat, decodedPayload.userId,decodedPayload.deviceId);
-
-        if (!result) {
-            return domainStatusResponse.unauthorized()
-        }
+        const decodedPayload = jwtService.getPayloadFromToken(refreshToken);
 
         await authRepository.deleteRefreshTokenVersion(decodedPayload.userId);
 
-        return domainStatusResponse.success(null);
+        return responseFactory.success(null);
     }
 }

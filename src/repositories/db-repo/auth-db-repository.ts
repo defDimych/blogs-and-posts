@@ -12,8 +12,13 @@ export const authRepository = {
         return result.insertedId.toString();
     },
 
-    async checkRefreshTokenVersion(iat: number, userId: string,deviceId:string) {
-        return await refreshTokenVersionCollection.findOne({iat, userId, deviceId});
+    async checkRefreshTokenVersion(iat: number, userId: string, deviceId: string) {
+        const refreshTokenVersion = await refreshTokenVersionCollection.findOne({iat, userId, deviceId});
+
+        if (!refreshTokenVersion) {
+            return false
+        }
+        return true
     },
 
     async updateRefreshTokenVersion(iat: number, userId: string,deviceId:string) {

@@ -2,7 +2,7 @@ import {NextFunction, Request, Response} from "express";
 import {HTTP_STATUSES} from "../../utils/http-statuses";
 import {jwtService} from "../../application/jwt-service";
 
-export const authentication = async (req: Request, res: Response, next: NextFunction) => {
+export const accessTokenValidator = async (req: Request, res: Response, next: NextFunction) => {
     const authHeader = req.headers['authorization'];
 
     if (!authHeader) {
@@ -11,7 +11,7 @@ export const authentication = async (req: Request, res: Response, next: NextFunc
     }
 
     const token = authHeader.split(' ')[1]
-    const userId = jwtService.getUserIdByToken(token);
+    const userId = jwtService.verifyAccessToken(token);
 
     if (!userId) {
         res.sendStatus(HTTP_STATUSES.UNAUTHORIZED_401);

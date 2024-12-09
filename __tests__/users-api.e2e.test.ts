@@ -1,4 +1,4 @@
-import {paginationTestHelper, req} from "./helpers/test-helpers";
+import {req} from "./helpers/test-helpers";
 import {SETTINGS} from "../src/utils/settings";
 import {fromUTF8ToBase64} from "../src/middlewares/auth/basic-auth-middleware";
 import {HTTP_STATUSES} from "../src/utils/http-statuses";

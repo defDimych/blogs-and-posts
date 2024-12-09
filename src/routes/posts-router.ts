@@ -14,12 +14,12 @@ import {postsService} from "../domain/posts-service";
 import {PaginationQueryType} from "../types/PaginationQueryType";
 import {getDefaultPaginationOptions} from "./helpers/pagination-helper";
 import {postsQueryRepository} from "../repositories/query-repo/posts-query-repository";
-import {authentication} from "../middlewares/auth/authentication ";
 import {commentInputValidationMiddleware} from "../middlewares/validation/comment-input-validation-middleware";
 import {CommentInputModel} from "../types/comments-type/CommentInputModel";
 import {DomainStatusCode, handleError} from "../utils/object-result";
 import {commentsQueryRepository} from "../repositories/query-repo/comments-query-repository";
 import {commentsService} from "../domain/comments-service";
+import {accessTokenValidator} from "../middlewares/auth/access-token-validator";
 
 export const getPostsRouter = () => {
     const router = express.Router();
@@ -61,7 +61,10 @@ export const getPostsRouter = () => {
 
             res.status(HTTP_STATUSES.CREATED_201).send(createdPost);
         })
-    router.post('/:postId/comments', authentication, commentInputValidationMiddleware, checkInputErrorsMiddleware,
+    router.post('/:postId/comments',
+        accessTokenValidator,
+        commentInputValidationMiddleware,
+        checkInputErrorsMiddleware,
         async (req: RequestWithParamsAndBody<{ postId: string }, CommentInputModel>, res: Response) => {
             const result = await commentsService.createComment(req.params.postId, req.body.content, req.userId!);
 

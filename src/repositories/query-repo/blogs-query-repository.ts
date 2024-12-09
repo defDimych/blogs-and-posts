@@ -41,4 +41,14 @@ export const blogsQueryRepository = {
             return null;
         }
     },
+
+    async findBlogByIdOrThrow(id: string): Promise<BlogViewModel> {
+        const blog: WithId<BlogDbModel> | null = await blogsCollection.findOne({ _id: new ObjectId(id) });
+
+        if (blog) {
+            return blogMapper(blog);
+        } else {
+             throw new Error(`[BlogQueryRepo:findBlogByIdOrThrow] blog with id ${id} not founded`);
+        }
+    },
 }

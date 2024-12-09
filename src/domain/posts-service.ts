@@ -1,16 +1,16 @@
 import {PostInputModel} from "../types/posts-types/PostInputModel";
 import {postsRepository} from "../repositories/db-repo/posts-db-repository";
 import {blogsRepository} from "../repositories/db-repo/blogs-db-repository";
-import {domainStatusResponse} from "../utils/object-result";
+import {responseFactory} from "../utils/object-result";
 
 export const postsService = {
     async checkPost(postId: string) {
         const foundPost = await postsRepository.findPostById(postId);
 
         if (!foundPost) {
-            return domainStatusResponse.notFound();
+            return responseFactory.notFound();
         }
-        return domainStatusResponse.success(null);
+        return responseFactory.success(null);
     },
 
     async createPost({ title, shortDescription, content, blogId }: PostInputModel): Promise<string> {

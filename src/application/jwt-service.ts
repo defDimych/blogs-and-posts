@@ -1,5 +1,3 @@
-import {WithId} from "mongodb";
-import {UserDbModel} from "../types/users-types/UserDbModel";
 import jwt from "jsonwebtoken";
 import {SETTINGS} from "../utils/settings";
 
@@ -11,13 +9,9 @@ interface TokenInterface {
 }
 
 export const jwtService = {
-    createJWTs(user: WithId<UserDbModel>) {
-        const accessToken = jwt.sign(
-            {userId: user._id}, SETTINGS.ACCESS_TOKEN_SECRET, {expiresIn: 10}
-        );
-        const refreshToken = jwt.sign(
-            {userId: user._id,deviceId:crypto.randomUUID()}, SETTINGS.REFRESH_TOKEN_SECRET, {expiresIn: 20}
-        );
+    createJWTs(userId: string) {
+        const accessToken = this.createAccessToken(userId);
+        const refreshToken = this.createRefreshToken(userId);
 
         return {
             accessToken: {
@@ -25,6 +19,18 @@ export const jwtService = {
             },
             refreshToken
         }
+    },
+
+    createAccessToken(userId: string) {
+        return jwt.sign(
+            {userId}, SETTINGS.ACCESS_TOKEN_SECRET, {expiresIn: 10}
+        );
+    },
+
+    createRefreshToken(userId: string) {
+        return jwt.sign(
+            {userId, deviceId:crypto.randomUUID()}, SETTINGS.REFRESH_TOKEN_SECRET, {expiresIn: 20}
+        );
     },
 
     getPayloadFromToken(token: string) {
@@ -41,7 +47,7 @@ export const jwtService = {
         }
     },
 
-    getUserIdByToken(token: string) {
+    verifyAccessToken(token: string) {
         try {
             const result = jwt.verify(token, SETTINGS.ACCESS_TOKEN_SECRET);
 

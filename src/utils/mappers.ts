@@ -60,3 +60,14 @@ export const commentMapper = (comment: WithId<CommentDbModel>): CommentViewModel
         createdAt: comment.createdAt
     }
 }
+
+export const generateErrorMessage = (message: string, field?: string) => {
+    return {
+        errorsMessages: [
+            {
+                message,
+                field
+            }
+        ]
+    };
+}

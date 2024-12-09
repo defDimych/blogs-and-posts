@@ -2,7 +2,7 @@ import {usersCollection} from "../db";
 import {UserDbModel} from "../../types/users-types/UserDbModel";
 import {ObjectId} from "mongodb";
 
-export const usersDbRepository = {
+export const usersRepository = {
     async findUserById(userId: string) {
         const user = await usersCollection.findOne({ _id: new ObjectId(userId) });
 
@@ -12,8 +12,8 @@ export const usersDbRepository = {
         return user;
     },
 
-    async findLoginOrEmail(loginOrEmail: string) {
-        return usersCollection.findOne({
+    async findUserByLoginOrEmail(loginOrEmail: string) {
+        return await usersCollection.findOne({
             $or: [
                 {"accountData.login": loginOrEmail},
                 {"accountData.email": loginOrEmail}

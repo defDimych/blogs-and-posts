@@ -35,7 +35,7 @@ export enum DomainStatusCode {
     EmailNotSend = 50
 }
 
-export const domainStatusResponse = {
+export const responseFactory = {
     success<T>(data: T): Result<T> {
         return {
             status: DomainStatusCode.Success,
@@ -76,6 +76,8 @@ export const domainStatusResponse = {
         }
     }
 }
+
+
 
 
 

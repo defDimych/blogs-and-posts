@@ -1,37 +1,25 @@
-import {usersDbRepository} from "../repositories/db-repo/users-db-repository";
+import {usersRepository} from "../repositories/db-repo/users-db-repository";
 import bcrypt from 'bcrypt';
-import {WithId} from "mongodb";
-import {UserDbModel} from "../types/users-types/UserDbModel";
-import {DomainStatusCode, domainStatusResponse, Result} from "../utils/object-result";
+import {DomainStatusCode, responseFactory, Result} from "../utils/object-result";
 import {uuid} from "uuidv4";
 import {add} from "date-fns/add";
-import {emailManager} from "../managers/email-manager";
-
-const generateErrorMessage = (message: string, field?: string) => {
-    return {
-        errorsMessages: [
-            {
-                message,
-                field
-            }
-        ]
-    };
-}
+import {emailManager} from "../application/email-manager";
+import {generateErrorMessage} from "../utils/mappers";
 
 export const usersService = {
     async checkUnique(login: string, email: string): Promise<Result<null>> {
-        const foundLogin = await usersDbRepository.findLogin(login);
-        const foundEmail = await usersDbRepository.findEmail(email);
+        const foundLogin = await usersRepository.findLogin(login);
+        const foundEmail = await usersRepository.findEmail(email);
 
         if (foundLogin) {
-            return domainStatusResponse.badRequest(generateErrorMessage('already exists', 'login'));
+            return responseFactory.badRequest(generateErrorMessage('already exists', 'login'));
         }
 
         if (foundEmail) {
-            return domainStatusResponse.badRequest(generateErrorMessage('already exists', 'email'));
+            return responseFactory.badRequest(generateErrorMessage('already exists', 'email'));
         }
 
-        return domainStatusResponse.success(null);
+        return responseFactory.success(null);
     },
 
     async createUserWithEmailConfirmation(login: string, password: string, email: string) {
@@ -58,15 +46,15 @@ export const usersService = {
                 isConfirmed: false
             }
         }
-        const createdUserId =  await usersDbRepository.saveUser(newUser);
+        const createdUserId =  await usersRepository.saveUser(newUser);
 
         const resultSending = await emailManager.sendEmailForConfirmation(email, newUser.emailConfirmation.confirmationCode);
 
         if (!resultSending) {
-            await usersDbRepository.deleteUser(createdUserId);
+            await usersRepository.deleteUser(createdUserId);
         }
 
-        return domainStatusResponse.success(createdUserId);
+        return responseFactory.success(createdUserId);
     },
 
     async createUser(login: string, password: string, email: string): Promise<Result<string | null>> {
@@ -93,13 +81,13 @@ export const usersService = {
                 isConfirmed: true
             }
         }
-        const createdUserId =  await usersDbRepository.saveUser(newUser);
+        const createdUserId =  await usersRepository.saveUser(newUser);
 
-        return domainStatusResponse.success<string>(createdUserId);
+        return responseFactory.success<string>(createdUserId);
     },
 
     async deleteUser(id: string): Promise<boolean> {
-        return await usersDbRepository.deleteUser(id);
+        return await usersRepository.deleteUser(id);
     },
 
     async _generateHash(password: string) {
@@ -108,61 +96,42 @@ export const usersService = {
         return await bcrypt.hash(password, passwordSalt);
     },
 
-    async checkCredentials(loginOrEmail: string, password: string): Promise<Result<WithId<UserDbModel> | null>> {
-        const foundUser = await usersDbRepository.findLoginOrEmail(loginOrEmail);
-
-        if (!foundUser) {
-            return domainStatusResponse.unauthorized();
-        }
-
-        if (!foundUser.emailConfirmation.isConfirmed) {
-            return domainStatusResponse.unauthorized(generateErrorMessage('Check your email'));
-        }
-
-        const match = await bcrypt.compare(password, foundUser.accountData.passwordHash);
-
-        if (!match) {
-            return domainStatusResponse.unauthorized();
-        }
-        return domainStatusResponse.success<WithId<UserDbModel>>(foundUser);
-    },
-
     async emailConfirmation(code: string) {
-        const user = await usersDbRepository.findUserByConfirmationCode(code);
+        const user = await usersRepository.findUserByConfirmationCode(code);
 
         if (!user) {
-            return domainStatusResponse.badRequest(generateErrorMessage('confirmation code is incorrect', 'code'));
+            return responseFactory.badRequest(generateErrorMessage('confirmation code is incorrect', 'code'));
         }
 
         if (user.emailConfirmation.isConfirmed) {
-            return domainStatusResponse.badRequest(generateErrorMessage('The account has already been activated', 'code'));
+            return responseFactory.badRequest(generateErrorMessage('The account has already been activated', 'code'));
         }
 
         if (user.emailConfirmation.expirationDate < new Date()) {
-            return domainStatusResponse.badRequest(generateErrorMessage('expired confirmation code', 'code'));
+            return responseFactory.badRequest(generateErrorMessage('expired confirmation code', 'code'));
         }
 
-        await usersDbRepository.updateConfirmation(user._id.toString());
+        await usersRepository.updateConfirmation(user._id.toString());
 
-        return domainStatusResponse.success(null);
+        return responseFactory.success(null);
     },
 
     async emailResending(email: string) {
-        const user = await usersDbRepository.findEmail(email);
+        const user = await usersRepository.findEmail(email);
 
         if (!user) {
-            return domainStatusResponse.badRequest(generateErrorMessage('Check your email is correct', 'email'));
+            return responseFactory.badRequest(generateErrorMessage('Check your email is correct', 'email'));
         }
 
         if (user.emailConfirmation.isConfirmed) {
-            return domainStatusResponse.badRequest(generateErrorMessage('The account has already been activated', 'email'));
+            return responseFactory.badRequest(generateErrorMessage('The account has already been activated', 'email'));
         }
 
         const newConfirmationCode = uuid();
 
-        await usersDbRepository.updateConfirmationCode(user._id.toString(), newConfirmationCode);
+        await usersRepository.updateConfirmationCode(user._id.toString(), newConfirmationCode);
         await emailManager.sendEmailForConfirmation(email, newConfirmationCode);
 
-        return domainStatusResponse.success(null);
+        return responseFactory.success(null);
     }
 }
