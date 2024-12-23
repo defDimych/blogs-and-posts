@@ -12,7 +12,8 @@ export const SETTINGS = {
         TESTS: '/testing/all-data',
         USERS: '/users',
         AUTH: '/auth',
-        COMMENTS: '/comments'
+        COMMENTS: '/comments',
+        SECURITY_DEVICES: '/security/devices'
     },
     CREDENTIALS: 'admin:qwerty'
 }

@@ -46,7 +46,7 @@ export const usersService = {
                 isConfirmed: false
             }
         }
-        const createdUserId =  await usersRepository.saveUser(newUser);
+        const createdUserId = await usersRepository.saveUser(newUser);
 
         const resultSending = await emailManager.sendEmailForConfirmation(email, newUser.emailConfirmation.confirmationCode);
 

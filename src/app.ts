@@ -8,6 +8,7 @@ import {getUsersRouter} from "./routes/users-router";
 import {getAuthRouter} from "./routes/auth-router";
 import {getCommentsRouter} from "./routes/comments-router";
 import cookieParser from "cookie-parser";
+import {getSecurityDevicesRouter} from "./routes/security-devices-router";
 
 // Create app
 export const app = express();
@@ -22,4 +23,4 @@ app.use(SETTINGS.PATH.POSTS, getPostsRouter());
 app.use(SETTINGS.PATH.USERS, getUsersRouter());
 app.use(SETTINGS.PATH.TESTS, getTestingRouter());
 app.use(SETTINGS.PATH.COMMENTS, getCommentsRouter());
-
+app.use(SETTINGS.PATH.SECURITY_DEVICES, getSecurityDevicesRouter());

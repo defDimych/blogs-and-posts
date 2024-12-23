@@ -4,8 +4,8 @@ import {
     blogsCollection,
     commentsCollection,
     postsCollection,
-    refreshTokenVersionCollection,
-    usersCollection
+    activeSessionsCollection,
+    usersCollection, requestLogCollection
 } from "../repositories/db";
 
 export const getTestingRouter = () => {
@@ -16,7 +16,8 @@ export const getTestingRouter = () => {
         await postsCollection.drop();
         await usersCollection.drop();
         await commentsCollection.drop();
-        await refreshTokenVersionCollection.drop();
+        await activeSessionsCollection.drop();
+        await requestLogCollection.drop();
 
         res.sendStatus(HTTP_STATUSES.NO_CONTENT_204);
     })

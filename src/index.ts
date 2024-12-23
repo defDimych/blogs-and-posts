@@ -2,6 +2,8 @@ import {app} from "./app";
 import {SETTINGS} from "./utils/settings";
 import {runDb} from "./repositories/db";
 
+app.set("trust proxy", true);
+
 const startApp = async () => {
     await runDb(SETTINGS.MONGO_URI);
     app.listen(SETTINGS.PORT, () => {

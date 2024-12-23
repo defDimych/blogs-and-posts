@@ -9,17 +9,17 @@ interface TokenInterface {
 }
 
 export const jwtService = {
-    createJWTs(userId: string) {
-        const accessToken = this.createAccessToken(userId);
-        const refreshToken = this.createRefreshToken(userId);
-
-        return {
-            accessToken: {
-                accessToken
-            },
-            refreshToken
-        }
-    },
+    // createJWTs(userId: string) {
+    //     const accessToken = this.createAccessToken(userId);
+    //     const refreshToken = this.createRefreshTokenWithGenerateDeviceId(userId);
+    //
+    //     return {
+    //         accessToken: {
+    //             accessToken
+    //         },
+    //         refreshToken
+    //     }
+    // },
 
     createAccessToken(userId: string) {
         return jwt.sign(
@@ -27,9 +27,15 @@ export const jwtService = {
         );
     },
 
-    createRefreshToken(userId: string) {
+    createRefreshTokenWithGenerateDeviceId(userId: string) {
         return jwt.sign(
-            {userId, deviceId:crypto.randomUUID()}, SETTINGS.REFRESH_TOKEN_SECRET, {expiresIn: 20}
+            {userId, deviceId: crypto.randomUUID()}, SETTINGS.REFRESH_TOKEN_SECRET, {expiresIn: 20}
+        );
+    },
+
+    createRefreshToken(userId: string, deviceId: string) {
+        return jwt.sign(
+            {userId, deviceId}, SETTINGS.REFRESH_TOKEN_SECRET, {expiresIn: 20}
         );
     },
 

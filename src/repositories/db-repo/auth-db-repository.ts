@@ -1,35 +1,31 @@
-import {refreshTokenVersionCollection} from "../db";
+import {activeSessionsCollection} from "../db";
 
 export const authRepository = {
-    async saveRefreshTokenVersion(iat: number, userId: string,deviceId:string) {
-        const refreshTokenVersion = {
-            iat,
-            userId,
-            deviceId
-        }
-
-        const result = await refreshTokenVersionCollection.insertOne(refreshTokenVersion)
-        return result.insertedId.toString();
+    async saveSession(session: {
+        userId: string,
+        iat: number,
+        deviceId: string,
+        deviceName: string,
+        IP: string,
+        exp: number
+    }) {
+        await activeSessionsCollection.insertOne(session);
     },
 
     async checkRefreshTokenVersion(iat: number, userId: string, deviceId: string) {
-        const refreshTokenVersion = await refreshTokenVersionCollection.findOne({iat, userId, deviceId});
-
-        if (!refreshTokenVersion) {
-            return false
-        }
-        return true
+        return await activeSessionsCollection.findOne({iat, userId, deviceId});
     },
 
-    async updateRefreshTokenVersion(iat: number, userId: string,deviceId:string) {
-        const result = await refreshTokenVersionCollection.updateMany({ userId }, { $set: {iat,deviceId} });
-
-        return result.modifiedCount === 1
+    async updateRefreshTokenVersion(version: { iat: number, userId: string, deviceId: string }) {
+        await activeSessionsCollection.updateOne(
+            {userId: version.userId, deviceId: version.deviceId},
+            {$set: {iat: version.iat}}
+        );
     },
 
-    async deleteRefreshTokenVersion(userId: string) {
-        const result = await refreshTokenVersionCollection.deleteMany({userId})
-
-        return result.deletedCount === 1
+    async deleteSession(refreshTokenMeta: {userId: string, deviceId: string}) {
+        return await activeSessionsCollection.deleteOne(
+            {userId: refreshTokenMeta.userId, deviceId: refreshTokenMeta.deviceId}
+        );
     }
 }

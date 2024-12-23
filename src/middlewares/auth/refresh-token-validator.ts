@@ -19,5 +19,7 @@ export const refreshTokenValidator = async (req: Request, res: Response, next: N
         res.sendStatus(HTTP_STATUSES.UNAUTHORIZED_401);
         return
     }
+
+    req.userId = decodedPayload.userId
     next()
 }

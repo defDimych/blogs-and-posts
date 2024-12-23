@@ -3,14 +3,16 @@ import {BlogDbModel} from "../types/blogs-types/BlogDbModel";
 import {PostDbModel} from "../types/posts-types/PostDbModel";
 import {UserDbModel} from "../types/users-types/UserDbModel";
 import {CommentDbModel} from "../types/comments-type/CommentDbModel";
-import {RefreshTokenVersionDbModel} from "../types/auth-types/RefreshTokenVersionDbModel";
+import {RequestLogDbModel} from "../types/auth-types/RequestLogDbModel";
+import {SessionDbModel} from "../types/auth-types/SessionDbModel";
 
 // Collections
 export let blogsCollection: Collection<BlogDbModel>
 export let postsCollection: Collection<PostDbModel>
 export let usersCollection: Collection<UserDbModel>
 export let commentsCollection: Collection<CommentDbModel>
-export let refreshTokenVersionCollection: Collection<RefreshTokenVersionDbModel>
+export let activeSessionsCollection: Collection<SessionDbModel>
+export let requestLogCollection: Collection<RequestLogDbModel>
 
 
 export async function runDb(url: string) {
@@ -21,7 +23,8 @@ export async function runDb(url: string) {
     postsCollection = db.collection('posts');
     usersCollection = db.collection('users');
     commentsCollection = db.collection('comments');
-    refreshTokenVersionCollection = db.collection('refresh-token-version');
+    activeSessionsCollection = db.collection('active-sessions');
+    requestLogCollection = db.collection('request-logs');
 
     try {
         await client.connect();

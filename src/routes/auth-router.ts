@@ -13,6 +13,7 @@ import {emailInputValidationMiddleware} from "../middlewares/validation/email-in
 import {authService} from "../domain/auth-service";
 import {refreshTokenValidator} from "../middlewares/auth/refresh-token-validator";
 import {accessTokenValidator} from "../middlewares/auth/access-token-validator";
+import {rateLimiter} from "../middlewares/auth/rate-limiter";
 
 export const getAuthRouter = () => {
     const router = express.Router();
@@ -24,14 +25,25 @@ export const getAuthRouter = () => {
 
             res.status(HTTP_STATUSES.SUCCESS_200).send(infoCurrentUser);
         })
-    router.post('/login', loginInputValidationMiddleware, checkInputErrorsMiddleware,
+    router.post('/login',
+        rateLimiter,
+        ...loginInputValidationMiddleware,
+        checkInputErrorsMiddleware,
         async (req: RequestWithBody<LoginInputModel>, res: Response) => {
-            const result = await authService.login(req.body.loginOrEmail, req.body.password);
+            const requestInfo = {
+                loginOrEmail: req.body.loginOrEmail,
+                password: req.body.password,
+                IP: req.ip || "",
+                deviceName: req.headers["user-agent"] || ""
+            }
+
+            const result = await authService.login(requestInfo);
 
             if (result.status !== DomainStatusCode.Success) {
                 res.sendStatus(handleError(result.status));
                 return
             }
+
             res.cookie('refreshToken', result.data!.refreshToken, {httpOnly: true, secure: true});
             res.status(HTTP_STATUSES.SUCCESS_200).send(result.data!.accessToken);
         })
@@ -40,15 +52,18 @@ export const getAuthRouter = () => {
         async (req: Request, res: Response) => {
             const refreshToken = req.cookies.refreshToken;
 
+            console.log('from controller: ' + refreshToken);
+
             const result = await authService.updateTokens(refreshToken);
 
             if (result.status !== DomainStatusCode.Success) {
-                res.sendStatus(handleError(result.status));
+                res.sendStatus(handleError(result.status))
                 return
             }
+
             res.cookie('refreshToken', result.data!.refreshToken, {httpOnly: true, secure: true});
             res.status(HTTP_STATUSES.SUCCESS_200).send(result.data!.accessToken);
-    })
+        })
     router.post('/logout',
         refreshTokenValidator,
         async (req: Request, res: Response) => {
@@ -62,7 +77,10 @@ export const getAuthRouter = () => {
             }
             res.sendStatus(HTTP_STATUSES.NO_CONTENT_204);
         })
-    router.post('/registration', ...userInputValidationMiddleware, checkInputErrorsMiddleware,
+    router.post('/registration',
+        rateLimiter,
+        ...userInputValidationMiddleware,
+        checkInputErrorsMiddleware,
         async (req: RequestWithBody<UserInputModel>, res: Response) => {
             const result = await usersService.createUserWithEmailConfirmation(req.body.login, req.body.password, req.body.email);
 
@@ -72,16 +90,19 @@ export const getAuthRouter = () => {
             }
             res.sendStatus(HTTP_STATUSES.NO_CONTENT_204);
         })
-    router.post('/registration-confirmation', async (req: RequestWithBody<{ code: string }>, res: Response) => {
-        const result = await usersService.emailConfirmation(req.body.code);
+    router.post('/registration-confirmation',
+        rateLimiter,
+        async (req: RequestWithBody<{ code: string }>, res: Response) => {
+            const result = await usersService.emailConfirmation(req.body.code);
 
-        if (result.status !== DomainStatusCode.Success) {
-            res.status(handleError(result.status)).send(result.extensions);
-            return
-        }
-        res.sendStatus(HTTP_STATUSES.NO_CONTENT_204);
-    })
+            if (result.status !== DomainStatusCode.Success) {
+                res.status(handleError(result.status)).send(result.extensions);
+                return
+            }
+            res.sendStatus(HTTP_STATUSES.NO_CONTENT_204);
+        })
     router.post('/registration-email-resending',
+        rateLimiter,
         emailInputValidationMiddleware,
         checkInputErrorsMiddleware,
         async (req: RequestWithBody<{ email: string }>, res: Response) => {
