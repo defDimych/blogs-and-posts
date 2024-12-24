@@ -52,8 +52,6 @@ export const getAuthRouter = () => {
         async (req: Request, res: Response) => {
             const refreshToken = req.cookies.refreshToken;
 
-            console.log('from controller: ' + refreshToken);
-
             const result = await authService.updateTokens(refreshToken);
 
             if (result.status !== DomainStatusCode.Success) {

@@ -29,13 +29,13 @@ export const jwtService = {
 
     createRefreshTokenWithGenerateDeviceId(userId: string) {
         return jwt.sign(
-            {userId, deviceId: crypto.randomUUID()}, SETTINGS.REFRESH_TOKEN_SECRET, {expiresIn: 20}
+            {userId, deviceId: crypto.randomUUID(), iat: Date.now(), exp: Date.now() + (20 * 1000)}, SETTINGS.REFRESH_TOKEN_SECRET
         );
     },
 
     createRefreshToken(userId: string, deviceId: string) {
         return jwt.sign(
-            {userId, deviceId}, SETTINGS.REFRESH_TOKEN_SECRET, {expiresIn: 20}
+            {userId, deviceId, iat: Date.now(), exp: Date.now() + (20 * 1000)}, SETTINGS.REFRESH_TOKEN_SECRET
         );
     },
 

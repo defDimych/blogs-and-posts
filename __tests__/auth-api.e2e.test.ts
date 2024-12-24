@@ -5,6 +5,7 @@ import {SETTINGS} from "../src/utils/settings";
 import {HTTP_STATUSES} from "../src/utils/http-statuses";
 import {usersTestManager} from "./helpers/usersTestManager";
 import {DeviceViewModel} from "../src/types/devices-types/DeviceViewModel";
+import {authTestManager} from "./helpers/authTestManager";
 
 describe('tests for /auth', () => {
     let server: MongoMemoryServer;
@@ -70,9 +71,8 @@ describe('tests for /auth', () => {
     })
 
     describe('session flow', () => {
-        let refresh_token: string;
         let sessionInfo: DeviceViewModel[]
-        let newRefreshToken: string;
+        let refresh_tokens: string[] = []
 
         it('must log in with different user-agents and return the correct number of sessions', async () => {
             const dataForNewUser = {
@@ -89,21 +89,11 @@ describe('tests for /auth', () => {
             }
 
             const userAgents = [
+                "Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:47.0) Gecko/20100101 Firefox/47.0",
                 "Mozilla/5.0 (Macintosh; Intel Mac OS X x.y; rv:42.0) Gecko/20100101 Firefox/42.0",
                 "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.103 Safari/537.36",
                 "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.106 Safari/537.36 OPR/38.0.2220.41"
             ];
-
-            await req
-                .post(SETTINGS.PATH.AUTH + '/login')
-                .set("User-Agent", "Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:47.0) Gecko/20100101 Firefox/47.0")
-                .send(dataForLogin)
-                .expect(HTTP_STATUSES.SUCCESS_200)
-                .then(response => {
-                    refresh_token = response.headers["set-cookie"]
-                })
-
-            console.log(refresh_token)
 
             for (let userAgent of userAgents) {
                 await req
@@ -111,61 +101,91 @@ describe('tests for /auth', () => {
                     .set("User-Agent", userAgent)
                     .send(dataForLogin)
                     .expect(HTTP_STATUSES.SUCCESS_200)
+                    .then(response => {
+                        const refresh_token = response.headers["set-cookie"]
+                        refresh_tokens.push(refresh_token);
+                    })
             }
+            const response = await authTestManager.getActiveSessions(refresh_tokens[0])
 
-            const res = await req
-                .get(SETTINGS.PATH.SECURITY_DEVICES)
-                .set("Cookie", refresh_token)
-                .expect(HTTP_STATUSES.SUCCESS_200)
+            sessionInfo = [...response.body];
 
-            sessionInfo = [...res.body];
-
-            expect(res.body.length).toEqual(4);
-            expect(res.body[0].title).toEqual("Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:47.0) Gecko/20100101 Firefox/47.0")
-            expect(res.body[1].title).toEqual(userAgents[0]);
-            expect(res.body[2].title).toEqual(userAgents[1]);
-            expect(res.body[3].title).toEqual(userAgents[2]);
+            expect(response.body.length).toEqual(4);
+            expect(response.body[0].title).toEqual(userAgents[0])
+            expect(response.body[1].title).toEqual(userAgents[1]);
+            expect(response.body[2].title).toEqual(userAgents[2]);
+            expect(response.body[3].title).toEqual(userAgents[3]);
         })
 
         it('should update refreshToken device 1', async () => {
+            // function delay(ms: number) {
+            //     return new Promise(resolve => setTimeout(resolve, ms))
+            // }
 
-            function delay(ms: number) {
-                return new Promise(resolve => setTimeout(resolve, ms))
-            }
-
-            await delay(2000);
+            // await delay(2000);
+            const refTokenBeforeUpdate = refresh_tokens[0];
 
             await req
                 .post(SETTINGS.PATH.AUTH + '/refresh-token')
-                .set("Cookie", refresh_token)
+                .set("Cookie", refresh_tokens[0])
                 .expect(HTTP_STATUSES.SUCCESS_200)
                 .then( response => {
-                    newRefreshToken = response.headers["set-cookie"];
+                    const updatedRefToken = response.headers["set-cookie"];
+                    refresh_tokens.splice(0, 1, updatedRefToken);
                 })
 
-            // const newRefreshToken = response.headers["set-cookie"];
+            expect(refresh_tokens[0]).not.toEqual(refTokenBeforeUpdate);
 
-            console.log(refresh_token)
-            console.log(newRefreshToken)
+            const response = await authTestManager.getActiveSessions(refresh_tokens[0])
 
-            expect(newRefreshToken).not.toEqual(refresh_token);
-
-
-            const response2 = await req
-                .get(SETTINGS.PATH.SECURITY_DEVICES)
-                .set("Cookie", newRefreshToken)
-                .expect(HTTP_STATUSES.SUCCESS_200)
-
-            expect(response2.body.length).toEqual(4);
-            expect(response2.body[0].lastActiveDate).not.toEqual(sessionInfo[0].lastActiveDate);
-            expect(response2.body[0].deviceId).toEqual(sessionInfo[0].deviceId);
-            expect(response2.body[1].deviceId).toEqual(sessionInfo[1].deviceId);
-            expect(response2.body[2].deviceId).toEqual(sessionInfo[2].deviceId);
-            expect(response2.body[3].deviceId).toEqual(sessionInfo[3].deviceId);
+            expect(response.body.length).toEqual(4);
+            expect(response.body[0].lastActiveDate).not.toEqual(sessionInfo[0].lastActiveDate);
+            expect(response.body[0].deviceId).toEqual(sessionInfo[0].deviceId);
+            expect(response.body[1].deviceId).toEqual(sessionInfo[1].deviceId);
+            expect(response.body[2].deviceId).toEqual(sessionInfo[2].deviceId);
+            expect(response.body[3].deviceId).toEqual(sessionInfo[3].deviceId);
         })
 
-        // it('should delete device 2 with refreshToken device 1', async () => {
-            // const response = await req.delete(SETTINGS.PATH)
-        // })
+        it('should delete device 2 with refreshToken device 1', async () => {
+            await req
+                .delete(SETTINGS.PATH.SECURITY_DEVICES + '/' + sessionInfo[1].deviceId)
+                .set('Cookie', refresh_tokens[0])
+                .expect(HTTP_STATUSES.NO_CONTENT_204);
+
+            const response = await authTestManager.getActiveSessions(refresh_tokens[0])
+
+            expect(response.body.length).toEqual(3);
+
+            for (let session of response.body) {
+                expect(session.deviceId).not.toEqual(sessionInfo[1].deviceId);
+            }
+        })
+
+        it('should logout current device', async () => {
+            await req
+                .post(SETTINGS.PATH.AUTH + '/logout')
+                .set("Cookie", refresh_tokens[2])
+                .expect(HTTP_STATUSES.NO_CONTENT_204);
+
+            const response = await authTestManager.getActiveSessions(refresh_tokens[0])
+
+            expect(response.body.length).toEqual(2);
+
+            for (let session of response.body) {
+                expect(session.deviceId).not.toEqual(sessionInfo[2].deviceId);
+            }
+        })
+
+        it('should logout of all devices using device 1', async () => {
+            await req
+                .delete(SETTINGS.PATH.SECURITY_DEVICES)
+                .set("Cookie", refresh_tokens[0])
+                .expect(HTTP_STATUSES.NO_CONTENT_204);
+
+            const response = await authTestManager.getActiveSessions(refresh_tokens[0])
+            
+            expect(response.body.length).toEqual(1);
+            expect(response.body[0].deviceId).toEqual(sessionInfo[0].deviceId);
+        })
     })
 })
