@@ -1,31 +1,18 @@
-import {BlogInputModel} from "../../types/blogs-types/BlogInputModel";
-import {blogsCollection} from "../db";
-import {BlogDbModel} from "../../types/blogs-types/BlogDbModel";
-import {ObjectId, WithId} from "mongodb";
+import {ObjectId} from "mongodb";
+import {BlogDocument, BlogModel} from "../../routes/blogs/blog.entity";
 
 export const blogsRepository = {
-    async findBlogById(id: string): Promise<WithId<BlogDbModel> | null> {
-        return blogsCollection.findOne({ _id: new ObjectId(id) });
+    async findBlogById(id: string): Promise<BlogDocument | null> {
+        return BlogModel.findOne({ _id: new ObjectId(id) });
     },
 
-    async createBlog(newBlog: BlogDbModel): Promise<string> {
-        const result = await blogsCollection.insertOne(newBlog);
-
-        return result.insertedId.toString();
-    },
-
-    async updateBlog(id: string, {name, description, websiteUrl}: BlogInputModel): Promise<boolean> {
-        const result = await blogsCollection.updateOne(
-            { _id: new ObjectId(id) }, { $set: { name, description, websiteUrl } }
-        )
-
-        return result.modifiedCount === 1;
+    async save(blog: BlogDocument): Promise<string> {
+        const savedBlog = await blog.save();
+        return savedBlog._id.toString()
     },
 
     async deleteBlog(id: string): Promise<boolean> {
-        const result = await blogsCollection.deleteOne({ _id: new ObjectId(id) });
-
-        return result.deletedCount === 1;
-    },
-
+        const blog = await BlogModel.findByIdAndDelete(id)
+        return !!blog
+    }
 }

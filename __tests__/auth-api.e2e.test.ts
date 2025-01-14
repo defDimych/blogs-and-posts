@@ -1,11 +1,12 @@
 import {MongoMemoryServer} from "mongodb-memory-server";
-import {runDb, usersCollection} from "../src/repositories/db";
 import {req} from "./helpers/test-helpers";
 import {SETTINGS} from "../src/utils/settings";
 import {HTTP_STATUSES} from "../src/utils/http-statuses";
 import {usersTestManager} from "./helpers/usersTestManager";
 import {DeviceViewModel} from "../src/types/devices-types/DeviceViewModel";
 import {authTestManager} from "./helpers/authTestManager";
+import {runDb} from "../src/db/run-db";
+import {UserModel} from "../src/routes/users/user.entity";
 
 describe('tests for /auth', () => {
     let server: MongoMemoryServer;
@@ -18,7 +19,7 @@ describe('tests for /auth', () => {
     })
 
     beforeEach(async () => {
-        await usersCollection.drop();
+        await UserModel.collection.drop();
     })
 
     it("shouldn't login with incorrect incoming data", async () => {
@@ -64,6 +65,7 @@ describe('tests for /auth', () => {
 
         const res2 = await req
             .post(SETTINGS.PATH.AUTH + '/login')
+            .set("User-Agent", "Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:47.0) Gecko/20100101 Firefox/47.0")
             .send(dataForLogin)
             .expect(HTTP_STATUSES.SUCCESS_200);
 

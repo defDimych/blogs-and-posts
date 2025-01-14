@@ -4,6 +4,10 @@ import {DomainStatusCode, responseFactory, Result} from "../utils/object-result"
 import {usersRepository} from "../repositories/db-repo/users-db-repository";
 import bcrypt from "bcrypt";
 import {generateErrorMessage} from "../utils/mappers";
+import {SessionModel} from "../routes/auth/session.entity";
+import {emailManager} from "../application/email-manager";
+import {uuid} from "uuidv4";
+import {add} from "date-fns/add";
 
 export const authService = {
     async checkCredentials(loginOrEmail: string, password: string) {
@@ -33,7 +37,6 @@ export const authService = {
         }
 
         const userId = result.data!.userId;
-        // const tokens = jwtService.createJWTs(userId);
         const accessToken = jwtService.createAccessToken(userId);
         const refreshToken = jwtService.createRefreshTokenWithGenerateDeviceId(userId);
 
@@ -48,7 +51,8 @@ export const authService = {
             exp: decodedPayload.exp
         }
 
-        await authRepository.saveSession(newSession);
+        const session = new SessionModel(newSession);
+        await authRepository.save(session);
 
         const tokens = {
             accessToken: {
@@ -63,19 +67,16 @@ export const authService = {
     async updateTokens(refreshToken: string) {
         const decodedPayload = jwtService.getPayloadFromToken(refreshToken);
 
-        // const tokens = jwtService.createJWTs(decodedPayload.userId);
         const newAccessToken = jwtService.createAccessToken(decodedPayload.userId);
         const newRefreshToken = jwtService.createRefreshToken(decodedPayload.userId, decodedPayload.deviceId);
 
         const refreshPayload = jwtService.getPayloadFromToken(newRefreshToken);
 
-        const newVersion = {
-            iat: refreshPayload.iat,
-            userId: refreshPayload.userId,
-            deviceId: decodedPayload.deviceId
-        }
+        const session = await authRepository.findSession(refreshPayload.userId, refreshPayload.deviceId);
+        if (!session) throw new Error('session not found')
 
-        await authRepository.updateRefreshTokenVersion(newVersion);
+        session.iat = refreshPayload.iat
+        await authRepository.save(session)
 
         const tokens = {
             accessToken: {
@@ -87,15 +88,49 @@ export const authService = {
         return responseFactory.success(tokens);
     },
 
+    async _generateHash(password: string) {
+        const passwordSalt = await bcrypt.genSalt(10);
+
+        return bcrypt.hash(password, passwordSalt);
+    },
+
+    async passwordRecovery(email: string): Promise<Result<null>> {
+        const user = await usersRepository.findEmail(email);
+        if (!user) return responseFactory.success(null);
+
+        user.passwordRecovery.recoveryCode = uuid()
+        user.passwordRecovery.expirationDate = add(new Date(), {minutes: 15});
+
+        await usersRepository.save(user);
+        await emailManager.sendEmailForPasswordRecovery(email, user.passwordRecovery.recoveryCode);
+
+        return responseFactory.success(null)
+    },
+
+    async confirmPasswordRecovery(newPassword: string, recoveryCode: string): Promise<Result<null>> {
+        const user = await usersRepository.findUserByPasswordRecoveryCode(recoveryCode);
+
+        if (!user) {
+            return responseFactory.badRequest(generateErrorMessage('recovery code is incorrect', 'recoveryCode'))
+        }
+
+        if (user.passwordRecovery.expirationDate < new Date()) {
+            return responseFactory.badRequest()
+        }
+
+        user.accountData.passwordHash = await this._generateHash(newPassword);
+        await usersRepository.save(user);
+
+        return responseFactory.success(null);
+    },
+
     async logout(refreshToken: string) {
         const decodedPayload = jwtService.getPayloadFromToken(refreshToken);
 
-        const refreshTokenMeta = {
-            userId: decodedPayload.userId,
-            deviceId: decodedPayload.deviceId
-        }
+        const session = await authRepository.findSession(decodedPayload.userId, decodedPayload.deviceId);
+        if (!session) throw new Error('session not found')
 
-        await authRepository.deleteSession(refreshTokenMeta);
+        await session.deleteOne()
 
         return responseFactory.success(null);
     }

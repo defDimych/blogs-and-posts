@@ -1,32 +1,18 @@
-import {PostInputModel} from "../../types/posts-types/PostInputModel";
-import {postsCollection} from "../db";
 import {ObjectId} from "mongodb";
-import {PostDbModel} from "../../types/posts-types/PostDbModel";
+import {PostDocument, PostModel} from "../../routes/posts/post.entity";
 
 export const postsRepository = {
-    async findPostById(postId: string) {
-        const foundPost = await postsCollection.findOne({ _id: new ObjectId(postId) })
-
-        return !!foundPost
+    async findPostById(postId: string): Promise<PostDocument | null> {
+        return PostModel.findOne({ _id: new ObjectId(postId) })
     },
 
-    async createPost(newPost: PostDbModel): Promise<string> {
-        const result = await postsCollection.insertOne(newPost);
-
-        return result.insertedId.toString();
-    },
-
-    async updatePost(id: string, { title, shortDescription, content, blogId }: PostInputModel): Promise<boolean> {
-        const result = await postsCollection.updateOne(
-            { _id: new ObjectId(id) }, { $set: {title, shortDescription, content, blogId} }
-        );
-
-        return result.modifiedCount === 1;
+    async save(post: PostDocument): Promise<string> {
+        const savedPost = await post.save();
+        return savedPost._id.toString()
     },
 
     async deletePost(id: string): Promise<boolean> {
-        const result = await postsCollection.deleteOne({ _id: new ObjectId(id) });
-
-        return result.deletedCount === 1;
+        const post = await PostModel.findByIdAndDelete(id);
+        return !!post;
     }
 }

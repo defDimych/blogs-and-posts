@@ -1,10 +1,10 @@
-import {usersCollection} from "../db";
+import {ObjectId, WithId} from "mongodb";
+import {UserDocument, UserModel} from "../../routes/users/user.entity";
 import {UserDbModel} from "../../types/users-types/UserDbModel";
-import {ObjectId} from "mongodb";
 
 export const usersRepository = {
-    async findUserById(userId: string) {
-        const user = await usersCollection.findOne({ _id: new ObjectId(userId) });
+    async findUserById(userId: string): Promise<WithId<UserDbModel>> {
+        const user = await UserModel.findOne({ _id: new ObjectId(userId) }).lean();
 
         if (!user) {
             throw new Error(`user by id: ${userId} not found`)
@@ -12,52 +12,38 @@ export const usersRepository = {
         return user;
     },
 
-    async findUserByLoginOrEmail(loginOrEmail: string) {
-        return await usersCollection.findOne({
+    async findUserByLoginOrEmail(loginOrEmail: string): Promise<WithId<UserDbModel> | null> {
+        return UserModel.findOne({
             $or: [
                 {"accountData.login": loginOrEmail},
                 {"accountData.email": loginOrEmail}
             ]
-        })
+        }).lean();
     },
 
-    async findUserByConfirmationCode(code: string) {
-        return await usersCollection.findOne({"emailConfirmation.confirmationCode": code});
+    async findUserByConfirmationCode(code: string): Promise<UserDocument | null> {
+        return UserModel.findOne({"emailConfirmation.confirmationCode": code})
     },
 
-    async findLogin(login: string) {
-        return await usersCollection.findOne({"accountData.login": login});
+    async findUserByPasswordRecoveryCode(code: string): Promise<UserDocument | null> {
+        return UserModel.findOne({"passwordRecovery.recoveryCode": code})
     },
 
-    async findEmail(email: string) {
-        return await usersCollection.findOne({"accountData.email": email});
+    async findLogin(login: string): Promise<UserDocument | null> {
+        return UserModel.findOne({"accountData.login": login})
     },
 
-    async updateConfirmation(id: string) {
-        const result = await usersCollection.updateOne(
-            { _id: new ObjectId(id) },
-            { $set: {"emailConfirmation.isConfirmed": true} }
-        );
-        return result.modifiedCount === 1;
+    async findEmail(email: string): Promise<UserDocument | null> {
+        return UserModel.findOne({"accountData.email": email})
     },
 
-    async updateConfirmationCode(id: string, newConfirmationCode: string) {
-        const result = await usersCollection.updateOne(
-            { _id: new ObjectId(id) },
-            { $set: {"emailConfirmation.confirmationCode": newConfirmationCode} }
-        );
-        return result.modifiedCount === 1;
-    },
-
-    async saveUser(user: UserDbModel) {
-        const result = await usersCollection.insertOne(user);
-
-        return result.insertedId.toString();
+    async save(user: UserDocument): Promise<string> {
+        const createdUser = await user.save()
+        return createdUser._id.toString()
     },
 
     async deleteUser(id: string): Promise<boolean> {
-        const result = await usersCollection.deleteOne({ _id: new ObjectId(id) });
-
-        return result.deletedCount === 1;
+        const user = await UserModel.findByIdAndDelete(id);
+        return !!user
     }
 }

@@ -1,15 +1,15 @@
 import express, {Response} from "express";
-import {RequestWithBody, RequestWithParams, RequestWithQuery} from "../types/request-types";
-import {PaginationQueryType} from "../types/PaginationQueryType";
-import {basicAuthMiddleware} from "../middlewares/auth/basic-auth-middleware";
-import {usersQueryRepository} from "../repositories/query-repo/users-query-repository";
-import {getDefaultPaginationOptions} from "./helpers/pagination-helper";
-import {HTTP_STATUSES} from "../utils/http-statuses";
-import {UserInputModel} from "../types/users-types/UserInputModel";
-import {userInputValidationMiddleware} from "../middlewares/validation/user-input-validation-middleware";
-import {checkInputErrorsMiddleware} from "../middlewares/check-input-errors-middleware";
-import {usersService} from "../domain/users-service";
-import {DomainStatusCode, handleError} from "../utils/object-result";
+import {RequestWithBody, RequestWithParams, RequestWithQuery} from "../../types/request-types";
+import {PaginationQueryType} from "../../types/PaginationQueryType";
+import {basicAuthMiddleware} from "../../middlewares/auth/basic-auth-middleware";
+import {usersQueryRepository} from "../../repositories/query-repo/users-query-repository";
+import {getDefaultPaginationOptions} from "../helpers/pagination-helper";
+import {HTTP_STATUSES} from "../../utils/http-statuses";
+import {UserInputModel} from "../../types/users-types/UserInputModel";
+import {userInputValidationMiddleware} from "../../middlewares/validation/user-input-validation-middleware";
+import {checkInputErrorsMiddleware} from "../../middlewares/check-input-errors-middleware";
+import {usersService} from "../../domain/users-service";
+import {DomainStatusCode, handleError} from "../../utils/object-result";
 
 export const getUsersRouter = () => {
     const router = express.Router();
@@ -21,7 +21,7 @@ export const getUsersRouter = () => {
     })
     router.post('/', basicAuthMiddleware, ...userInputValidationMiddleware, checkInputErrorsMiddleware,
         async (req: RequestWithBody<UserInputModel>, res: Response) => {
-            const result = await usersService.createUser(req.body.login, req.body.password, req.body.email);
+            const result = await usersService.createUser(req.body);
 
             if (result.status !== DomainStatusCode.Success) {
                 res.status(handleError(result.status)).send(result.extensions)

@@ -1,10 +1,11 @@
 import {PaginationType} from "../../routes/helpers/pagination-helper";
 import {PaginationModel} from "../../types/PaginationModel";
 import {ObjectId, WithId} from "mongodb";
-import {usersCollection} from "../db";
 import {meInfoMapper, userMapper} from "../../utils/mappers";
 import {UserViewModel} from "../../types/users-types/UserViewModel";
 import {UserDbModel} from "../../types/users-types/UserDbModel";
+import {UserModel} from "../../routes/users/user.entity";
+import {MeInfoViewModel} from "../../types/users-types/MeInfoViewModel";
 
 export const usersQueryRepository = {
     async getAllUsers(options: PaginationType): Promise<PaginationModel<UserViewModel[]>> {
@@ -19,14 +20,14 @@ export const usersQueryRepository = {
         const sortDirection = options.sortDirection === 'asc' ? 1 : -1
 
         try {
-            const items: WithId<UserDbModel>[] = await usersCollection
+            const items: WithId<UserDbModel>[] = await UserModel
                 .find(filter)
                 .sort({[options.sortBy]: sortDirection})
                 .skip((options.pageNumber - 1) * options.pageSize)
                 .limit(options.pageSize)
-                .toArray()
+                .lean()
 
-            const totalCount = await usersCollection.countDocuments(filter);
+            const totalCount = await UserModel.countDocuments(filter);
 
             return {
                 pagesCount: Math.ceil(totalCount / options.pageSize),
@@ -41,8 +42,8 @@ export const usersQueryRepository = {
         }
     },
 
-    async getInfoById(id: string) {
-        const user: WithId<UserDbModel> | null = await usersCollection.findOne({ _id: new ObjectId(id) });
+    async getInfoById(id: string): Promise<MeInfoViewModel | null> {
+        const user: WithId<UserDbModel> | null = await UserModel.findOne({ _id: new ObjectId(id) }).lean();
 
         if (user) {
             return meInfoMapper(user);
@@ -52,7 +53,7 @@ export const usersQueryRepository = {
     },
 
     async findUserById(id: string): Promise<UserViewModel | null> {
-        const user: WithId<UserDbModel> | null = await usersCollection.findOne({ _id: new ObjectId(id) });
+        const user: WithId<UserDbModel> | null = await UserModel.findOne({ _id: new ObjectId(id) }).lean();
 
         if (user) {
             return userMapper(user);

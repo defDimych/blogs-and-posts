@@ -1,28 +1,13 @@
-import {CommentDbModel} from "../../types/comments-type/CommentDbModel";
-import {commentsCollection} from "../db";
 import {ObjectId} from "mongodb";
+import {CommentDocument, CommentModel} from "../../routes/comments/comment.entity";
 
 export const commentsRepository = {
-    async deleteComment(commentId: string) {
-        const result = await commentsCollection.deleteOne({ _id: new ObjectId(commentId) })
-
-        return result.deletedCount === 1;
+    async findCommentById(commentId: string): Promise<CommentDocument | null> {
+        return CommentModel.findOne({ _id: new ObjectId(commentId) })
     },
 
-    async updateComment(commentId: string, content: string) {
-        const result = await commentsCollection.updateOne(
-            { _id: new ObjectId(commentId) },
-            { $set: {content} }
-        )
-        return result.modifiedCount === 1;
-    },
-
-    async findCommentById(commentId: string) {
-        return await commentsCollection.findOne({ _id: new ObjectId(commentId) })
-    },
-
-    async saveComment(comment: CommentDbModel) {
-        const result = await commentsCollection.insertOne(comment);
-        return result.insertedId.toString();
+    async save(comment: CommentDocument): Promise<string> {
+        const updatedComment = await comment.save();
+        return updatedComment._id.toString()
     }
 }

@@ -1,12 +1,12 @@
 import express from 'express';
 import {SETTINGS} from "./utils/settings";
-import {getBlogsRouter} from "./routes/blogs-router";
-import {getPostsRouter} from "./routes/posts-router";
+import {getBlogsRouter} from "./routes/blogs/blogs-router";
+import {getPostsRouter} from "./routes/posts/posts-router";
 import {getTestingRouter} from "./routes/test-router";
 import cors from "cors";
-import {getUsersRouter} from "./routes/users-router";
-import {getAuthRouter} from "./routes/auth-router";
-import {getCommentsRouter} from "./routes/comments-router";
+import {getUsersRouter} from "./routes/users/users-router";
+import {getAuthRouter} from "./routes/auth/auth-router";
+import {getCommentsRouter} from "./routes/comments/comments-router";
 import cookieParser from "cookie-parser";
 import {getSecurityDevicesRouter} from "./routes/security-devices-router";
 

@@ -1,24 +1,24 @@
-import {commentsCollection} from "../db";
 import {ObjectId, WithId} from "mongodb";
 import {commentMapper} from "../../utils/mappers";
 import {PaginationType} from "../../routes/helpers/pagination-helper";
 import {CommentDbModel} from "../../types/comments-type/CommentDbModel";
 import {PaginationModel} from "../../types/PaginationModel";
 import {CommentViewModel} from "../../types/comments-type/CommentViewModel";
+import {CommentModel} from "../../routes/comments/comment.entity";
 
 export const commentsQueryRepository = {
     async getAllComments(options: PaginationType, postId: string): Promise<PaginationModel<CommentViewModel[]>> {
         const sortDirection = options.sortDirection === 'asc' ? 1 : -1
 
         try {
-            const items: WithId<CommentDbModel>[] = await commentsCollection
+            const items: WithId<CommentDbModel>[] = await CommentModel
                 .find({postId})
                 .sort({[options.sortBy]: sortDirection})
                 .skip((options.pageNumber - 1) * options.pageSize)
                 .limit(options.pageSize)
-                .toArray()
+                .lean()
 
-            const totalCount = await commentsCollection.countDocuments({postId});
+            const totalCount = await CommentModel.countDocuments({postId});
 
             return {
                 pagesCount: Math.ceil(totalCount / options.pageSize),
@@ -33,13 +33,13 @@ export const commentsQueryRepository = {
         }
     },
 
-    async findCommentById(id: string) {
-        const foundComment = await commentsCollection.findOne({ _id: new ObjectId(id) });
+    async findCommentById(id: string): Promise<CommentViewModel> {
+        const comment = await CommentModel.findOne({ _id: new ObjectId(id) }).lean();
 
-        if (!foundComment) {
+        if (!comment) {
             throw new Error(`comment by id: ${id} not found`)
         }
 
-        return commentMapper(foundComment);
+        return commentMapper(comment);
     }
 }

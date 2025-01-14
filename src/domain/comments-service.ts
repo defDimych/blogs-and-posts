@@ -1,22 +1,23 @@
 import {commentsRepository} from "../repositories/db-repo/comments-db-repository";
-import {responseFactory} from "../utils/object-result";
+import {responseFactory, Result} from "../utils/object-result";
 import {postsRepository} from "../repositories/db-repo/posts-db-repository";
 import {usersRepository} from "../repositories/db-repo/users-db-repository";
+import {CommentModel} from "../routes/comments/comment.entity";
 
 export const commentsService = {
-    async checkComment(commentId: string) {
-        const foundComment = await commentsRepository.findCommentById(commentId);
+    async checkComment(commentId: string): Promise<Result<null>> {
+        const comment = await commentsRepository.findCommentById(commentId);
 
-        if (!foundComment) {
+        if (!comment) {
             return responseFactory.notFound();
         }
         return responseFactory.success(null);
     },
 
-    async createComment(postId: string, content: string, userId: string) {
-        const isFound = await postsRepository.findPostById(postId);
+    async createComment(postId: string, content: string, userId: string): Promise<Result<null> | Result<string>> {
+        const post = await postsRepository.findPostById(postId);
 
-        if (!isFound) {
+        if (!post) {
             return responseFactory.notFound();
         }
 
@@ -28,50 +29,45 @@ export const commentsService = {
             commentatorInfo: {
                 userId: user._id.toString(),
                 userLogin: user.accountData.login
-            },
-            createdAt: new Date().toISOString()
+            }
         }
-        const savedCommentId = await commentsRepository.saveComment(newComment);
 
-        return responseFactory.success(savedCommentId);
+        const comment = new CommentModel(newComment);
+        const commentId = await commentsRepository.save(comment);
+
+        return responseFactory.success(commentId);
     },
 
-    async updateComment(userId: string, commentId: string, content: string) {
-        const foundComment = await commentsRepository.findCommentById(commentId);
+    async updateComment(userId: string, commentId: string, content: string): Promise<Result<null>> {
+        const comment = await commentsRepository.findCommentById(commentId);
 
-        if (!foundComment) {
+        if (!comment) {
             return responseFactory.notFound()
         }
 
-        if (foundComment.commentatorInfo.userId !== userId) {
+        if (comment.commentatorInfo.userId !== userId) {
             return responseFactory.forbidden()
         }
 
-        const isUpdated = await commentsRepository.updateComment(commentId, content);
+        comment.content = content;
 
-        if (!isUpdated) {
-            throw new Error(`Failed to update comment by id: ${commentId}`);
-        }
+        await commentsRepository.save(comment);
 
         return responseFactory.success(null);
     },
 
-    async deleteComment(userId: string, commentId: string) {
-        const foundComment = await commentsRepository.findCommentById(commentId);
+    async deleteComment(userId: string, commentId: string): Promise<Result<null>> {
+        const comment = await commentsRepository.findCommentById(commentId);
 
-        if (!foundComment) {
+        if (!comment) {
             return responseFactory.notFound()
         }
 
-        if (foundComment.commentatorInfo.userId !== userId) {
+        if (comment.commentatorInfo.userId !== userId) {
             return responseFactory.forbidden()
         }
 
-        const isDeleted = await commentsRepository.deleteComment(commentId);
-
-        if (!isDeleted) {
-            throw new Error(`Failed to delete comment by id: ${commentId}`);
-        }
+        await comment.deleteOne();
 
         return responseFactory.success(null);
     }

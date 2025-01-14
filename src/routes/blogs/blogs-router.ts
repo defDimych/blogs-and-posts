@@ -1,18 +1,19 @@
 import express, {Request, Response} from "express";
-import {HTTP_STATUSES} from "../utils/http-statuses";
-import {BlogInputModel} from "../types/blogs-types/BlogInputModel";
-import {blogInputValidationMiddlewares} from "../middlewares/validation/blog-input-validation-middlewares";
-import {basicAuthMiddleware} from "../middlewares/auth/basic-auth-middleware";
-import {checkInputErrorsMiddleware} from "../middlewares/check-input-errors-middleware";
-import {blogsService} from "../domain/blogs-service";
-import {RequestWithParamsAndBody, RequestWithParamsAndQuery, RequestWithQuery} from "../types/request-types";
-import {BlogPostInputModel} from "../types/posts-types/BlogPostInputModel";
-import {postsService} from "../domain/posts-service";
-import {PaginationQueryType} from "../types/PaginationQueryType";
-import {getDefaultPaginationOptions} from "./helpers/pagination-helper";
-import {blogPostInputValidationMiddleware} from "../middlewares/validation/blog-post-input-validation-middleware";
-import {blogsQueryRepository} from "../repositories/query-repo/blogs-query-repository";
-import {postsQueryRepository} from "../repositories/query-repo/posts-query-repository";
+import {HTTP_STATUSES} from "../../utils/http-statuses";
+import {BlogInputModel} from "../../types/blogs-types/BlogInputModel";
+import {blogInputValidationMiddlewares} from "../../middlewares/validation/blog-input-validation-middlewares";
+import {basicAuthMiddleware} from "../../middlewares/auth/basic-auth-middleware";
+import {checkInputErrorsMiddleware} from "../../middlewares/check-input-errors-middleware";
+import {blogsService} from "../../domain/blogs-service";
+import {RequestWithParamsAndBody, RequestWithParamsAndQuery, RequestWithQuery} from "../../types/request-types";
+import {BlogPostInputModel} from "../../types/posts-types/BlogPostInputModel";
+import {postsService} from "../../domain/posts-service";
+import {PaginationQueryType} from "../../types/PaginationQueryType";
+import {getDefaultPaginationOptions} from "../helpers/pagination-helper";
+import {blogPostInputValidationMiddleware} from "../../middlewares/validation/blog-post-input-validation-middleware";
+import {blogsQueryRepository} from "../../repositories/query-repo/blogs-query-repository";
+import {postsQueryRepository} from "../../repositories/query-repo/posts-query-repository";
+import {DomainStatusCode, handleError} from "../../utils/object-result";
 
 export const getBlogsRouter = () => {
     const router = express.Router();
@@ -68,13 +69,13 @@ export const getBlogsRouter = () => {
     })
     router.put('/:id', basicAuthMiddleware, ...blogInputValidationMiddlewares, checkInputErrorsMiddleware,
         async (req: Request<any, any, BlogInputModel>, res: Response) => {
-            const isUpdated = await blogsService.updateBlog(req.params.id, req.body);
+            const result = await blogsService.updateBlog(req.params.id, req.body);
 
-            if (isUpdated) {
-                res.sendStatus(HTTP_STATUSES.NO_CONTENT_204);
-            } else {
-                res.sendStatus(HTTP_STATUSES.NOT_FOUND_404);
+            if (result.status !== DomainStatusCode.Success) {
+                res.sendStatus(handleError(result.status))
+                return
             }
+            res.sendStatus(HTTP_STATUSES.NO_CONTENT_204);
         })
     router.delete('/:id', basicAuthMiddleware, async (req: Request, res: Response) => {
         const isDeleted = await blogsService.deleteBlog(req.params.id);

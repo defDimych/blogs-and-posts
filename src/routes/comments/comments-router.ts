@@ -1,13 +1,13 @@
 import express, {Response} from "express";
-import {commentInputValidationMiddleware} from "../middlewares/validation/comment-input-validation-middleware";
-import {RequestWithParams, RequestWithParamsAndBody} from "../types/request-types";
-import {CommentInputModel} from "../types/comments-type/CommentInputModel";
-import {commentsService} from "../domain/comments-service";
-import {DomainStatusCode, handleError} from "../utils/object-result";
-import {HTTP_STATUSES} from "../utils/http-statuses";
-import {commentsQueryRepository} from "../repositories/query-repo/comments-query-repository";
-import {checkInputErrorsMiddleware} from "../middlewares/check-input-errors-middleware";
-import {accessTokenValidator} from "../middlewares/auth/access-token-validator";
+import {commentInputValidationMiddleware} from "../../middlewares/validation/comment-input-validation-middleware";
+import {RequestWithParams, RequestWithParamsAndBody} from "../../types/request-types";
+import {CommentInputModel} from "../../types/comments-type/CommentInputModel";
+import {commentsService} from "../../domain/comments-service";
+import {DomainStatusCode, handleError} from "../../utils/object-result";
+import {HTTP_STATUSES} from "../../utils/http-statuses";
+import {commentsQueryRepository} from "../../repositories/query-repo/comments-query-repository";
+import {checkInputErrorsMiddleware} from "../../middlewares/check-input-errors-middleware";
+import {accessTokenValidator} from "../../middlewares/auth/access-token-validator";
 
 export const getCommentsRouter = () => {
     const router = express.Router();

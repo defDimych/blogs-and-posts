@@ -1,25 +1,25 @@
 import express, {Request, Response} from "express";
-import {HTTP_STATUSES} from "../utils/http-statuses";
-import {basicAuthMiddleware} from "../middlewares/auth/basic-auth-middleware";
-import {checkInputErrorsMiddleware} from "../middlewares/check-input-errors-middleware";
+import {HTTP_STATUSES} from "../../utils/http-statuses";
+import {basicAuthMiddleware} from "../../middlewares/auth/basic-auth-middleware";
+import {checkInputErrorsMiddleware} from "../../middlewares/check-input-errors-middleware";
 import {
     RequestWithBody,
     RequestWithParamsAndBody,
     RequestWithParamsAndQuery,
     RequestWithQuery
-} from "../types/request-types";
-import {PostInputModel} from "../types/posts-types/PostInputModel";
-import {postInputValidationMiddlewares} from "../middlewares/validation/post-input-validation-middlewares";
-import {postsService} from "../domain/posts-service";
-import {PaginationQueryType} from "../types/PaginationQueryType";
-import {getDefaultPaginationOptions} from "./helpers/pagination-helper";
-import {postsQueryRepository} from "../repositories/query-repo/posts-query-repository";
-import {commentInputValidationMiddleware} from "../middlewares/validation/comment-input-validation-middleware";
-import {CommentInputModel} from "../types/comments-type/CommentInputModel";
-import {DomainStatusCode, handleError} from "../utils/object-result";
-import {commentsQueryRepository} from "../repositories/query-repo/comments-query-repository";
-import {commentsService} from "../domain/comments-service";
-import {accessTokenValidator} from "../middlewares/auth/access-token-validator";
+} from "../../types/request-types";
+import {PostInputModel} from "../../types/posts-types/PostInputModel";
+import {postInputValidationMiddlewares} from "../../middlewares/validation/post-input-validation-middlewares";
+import {postsService} from "../../domain/posts-service";
+import {PaginationQueryType} from "../../types/PaginationQueryType";
+import {getDefaultPaginationOptions} from "../helpers/pagination-helper";
+import {postsQueryRepository} from "../../repositories/query-repo/posts-query-repository";
+import {commentInputValidationMiddleware} from "../../middlewares/validation/comment-input-validation-middleware";
+import {CommentInputModel} from "../../types/comments-type/CommentInputModel";
+import {DomainStatusCode, handleError} from "../../utils/object-result";
+import {commentsQueryRepository} from "../../repositories/query-repo/comments-query-repository";
+import {commentsService} from "../../domain/comments-service";
+import {accessTokenValidator} from "../../middlewares/auth/access-token-validator";
 
 export const getPostsRouter = () => {
     const router = express.Router();

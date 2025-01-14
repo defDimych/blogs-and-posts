@@ -2,23 +2,23 @@ import {PaginationModel} from "../../types/PaginationModel";
 import {PostViewModel} from "../../types/posts-types/PostViewModel";
 import {ObjectId, WithId} from "mongodb";
 import {PostDbModel} from "../../types/posts-types/PostDbModel";
-import {postsCollection} from "../db";
 import {postMapper} from "../../utils/mappers";
 import {PaginationType} from "../../routes/helpers/pagination-helper";
+import {PostModel} from "../../routes/posts/post.entity";
 
 export const postsQueryRepository = {
     async getAllPostsByBlogId(options: PaginationType, blogId: string): Promise<PaginationModel<PostViewModel[]>> {
         const sortDirection = options.sortDirection === 'asc' ? 1 : -1
 
         try {
-            const items: WithId<PostDbModel>[] = await postsCollection
+            const items: WithId<PostDbModel>[] = await PostModel
                 .find({blogId})
                 .sort({[options.sortBy]: sortDirection})
                 .skip((options.pageNumber - 1) * options.pageSize)
                 .limit(options.pageSize)
-                .toArray()
+                .lean()
 
-            const totalCount = await postsCollection.countDocuments({blogId});
+            const totalCount = await PostModel.countDocuments({blogId});
 
             return {
                 pagesCount: Math.ceil(totalCount / options.pageSize),
@@ -37,14 +37,14 @@ export const postsQueryRepository = {
         const sortDirection = options.sortDirection === 'asc' ? 1 : -1
 
         try {
-            const items: WithId<PostDbModel>[] = await postsCollection
+            const items: WithId<PostDbModel>[] = await PostModel
                 .find({})
                 .sort({[options.sortBy]: sortDirection})
                 .skip((options.pageNumber - 1) * options.pageSize)
                 .limit(options.pageSize)
-                .toArray()
+                .lean()
 
-            const totalCount = await postsCollection.countDocuments({});
+            const totalCount = await PostModel.countDocuments({});
 
             return {
                 pagesCount: Math.ceil(totalCount / options.pageSize),
@@ -60,7 +60,7 @@ export const postsQueryRepository = {
     },
 
     async findPostById(id: string): Promise<PostViewModel | null> {
-        const post: WithId<PostDbModel> | null = await postsCollection.findOne({ _id: new ObjectId(id) });
+        const post: WithId<PostDbModel> | null = await PostModel.findOne({ _id: new ObjectId(id) });
 
         if (post) {
             return postMapper(post);

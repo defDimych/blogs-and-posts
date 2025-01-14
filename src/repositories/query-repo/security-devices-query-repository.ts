@@ -1,9 +1,9 @@
-import {activeSessionsCollection} from "../db";
 import {DeviceViewModel} from "../../types/devices-types/DeviceViewModel";
+import {SessionModel} from "../../routes/auth/session.entity";
 
 export const securityDevicesQueryRepository = {
     async getAllActiveSessions(userId: string): Promise<DeviceViewModel[]> {
-        const listDevices = await activeSessionsCollection.find({userId}).toArray()
+        const listDevices = await SessionModel.find({userId}).lean()
 
         return listDevices.map(device => {
             return {

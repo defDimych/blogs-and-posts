@@ -1,10 +1,10 @@
-import {requestLogCollection} from "../db";
 import {sub} from "date-fns";
 import {RequestInfoDTO} from "../../types/DTO-types";
+import {RequestMetaModel} from "../../routes/auth/request-meta.entity";
 
 export const rateLimiterRepository = {
     async countDocumentsByIpUrlAndDate(requestInfoDTO: RequestInfoDTO) {
-        return await requestLogCollection.countDocuments(
+        return RequestMetaModel.countDocuments(
             {
                 IP: requestInfoDTO.IP,
                 URL: requestInfoDTO.URL,
@@ -14,6 +14,6 @@ export const rateLimiterRepository = {
     },
 
     async saveAppeal(requestInfoDTO: RequestInfoDTO) {
-        await requestLogCollection.insertOne(requestInfoDTO);
+        await RequestMetaModel.create(requestInfoDTO);
     }
 }

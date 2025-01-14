@@ -2,9 +2,9 @@ import {PaginationModel} from "../../types/PaginationModel";
 import {BlogViewModel} from "../../types/blogs-types/BlogViewModel";
 import {ObjectId, WithId} from "mongodb";
 import {BlogDbModel} from "../../types/blogs-types/BlogDbModel";
-import {blogsCollection} from "../db";
 import {blogMapper} from "../../utils/mappers";
 import {PaginationType} from "../../routes/helpers/pagination-helper";
+import {BlogModel} from "../../routes/blogs/blog.entity";
 
 export const blogsQueryRepository = {
     async getAllBlogs(options: PaginationType): Promise<PaginationModel<BlogViewModel[]>> {
@@ -14,14 +14,14 @@ export const blogsQueryRepository = {
 
         const sortDirection = options.sortDirection === 'asc' ? 1 : -1
 
-        const items: WithId<BlogDbModel>[] = await blogsCollection
+        const items: WithId<BlogDbModel>[] = await BlogModel
             .find(filter)
             .sort({[options.sortBy]: sortDirection })
             .skip((options.pageNumber - 1) * options.pageSize)
             .limit(options.pageSize)
-            .toArray()
+            .lean()
 
-        const totalCount = await blogsCollection.countDocuments(filter);
+        const totalCount = await BlogModel.countDocuments(filter);
 
         return {
             pagesCount: Math.ceil(totalCount / options.pageSize),
@@ -33,7 +33,7 @@ export const blogsQueryRepository = {
     },
 
     async findBlogById(id: string): Promise<BlogViewModel | null> {
-        const blog: WithId<BlogDbModel> | null = await blogsCollection.findOne({ _id: new ObjectId(id) });
+        const blog: WithId<BlogDbModel> | null = await BlogModel.findOne({ _id: new ObjectId(id) });
 
         if (blog) {
             return blogMapper(blog);
@@ -43,7 +43,7 @@ export const blogsQueryRepository = {
     },
 
     async findBlogByIdOrThrow(id: string): Promise<BlogViewModel> {
-        const blog: WithId<BlogDbModel> | null = await blogsCollection.findOne({ _id: new ObjectId(id) });
+        const blog: WithId<BlogDbModel> | null = await BlogModel.findOne({ _id: new ObjectId(id) });
 
         if (blog) {
             return blogMapper(blog);

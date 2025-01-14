@@ -28,7 +28,7 @@ export const postMapper = (post: WithId<PostDbModel>): PostViewModel => {
         content: post.content,
         blogId: post.blogId,
         blogName: post.blogName,
-        createdAt: post.createdAt
+        createdAt: post.createdAt.toISOString()
     }
 }
 
@@ -57,7 +57,7 @@ export const commentMapper = (comment: WithId<CommentDbModel>): CommentViewModel
             userLogin: comment.commentatorInfo.userLogin
         },
         content: comment.content,
-        createdAt: comment.createdAt
+        createdAt: comment.createdAt.toISOString()
     }
 }
 

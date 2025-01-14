@@ -1,9 +1,12 @@
-import {activeSessionsCollection} from "../db";
-import {ObjectId} from "mongodb";
+import {SessionDocument, SessionModel} from "../../routes/auth/session.entity";
 
 export const sessionsRepository = {
+    async findSessionByDeviceId(deviceId: string): Promise<SessionDocument | null> {
+        return SessionModel.findOne({deviceId})
+    },
+
     async endSessionsExcludingCurrentOneOrThrow(refreshTokenMeta: {userId: string, deviceId: string, iat: number}) {
-        const result = await activeSessionsCollection.deleteMany(
+        const result = await SessionModel.deleteMany(
             {
                 userId: refreshTokenMeta.userId,
                 deviceId: {$ne: refreshTokenMeta.deviceId},
@@ -13,19 +16,6 @@ export const sessionsRepository = {
 
         if (!result.deletedCount) {
             throw new Error('[endSessionsExcludingCurrentOneOrThrow]: failed to delete')
-        }
-        return true
-    },
-
-    async findSessionByDeviceId(deviceId: string) {
-        return await activeSessionsCollection.findOne({deviceId})
-    },
-
-    async deleteSessionByIdOrThrow(id: string) {
-        const result = await activeSessionsCollection.deleteOne({_id: new ObjectId(id)})
-
-        if (!result.deletedCount) {
-            throw new Error('[deleteSessionByIdOrThrow]: failed to delete')
         }
         return true
     }

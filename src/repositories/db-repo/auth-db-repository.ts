@@ -1,31 +1,17 @@
-import {activeSessionsCollection} from "../db";
+import {SessionDocument, SessionModel} from "../../routes/auth/session.entity";
+import {WithId} from "mongodb";
+import {SessionDbModel} from "../../types/auth-types/SessionDbModel";
 
 export const authRepository = {
-    async saveSession(session: {
-        userId: string,
-        iat: number,
-        deviceId: string,
-        deviceName: string,
-        IP: string,
-        exp: number
-    }) {
-        await activeSessionsCollection.insertOne(session);
+    async findSession(userId: string, deviceId: string): Promise<SessionDocument | null> {
+        return SessionModel.findOne({userId, deviceId});
     },
 
-    async checkRefreshTokenVersion(iat: number, userId: string, deviceId: string) {
-        return await activeSessionsCollection.findOne({iat, userId, deviceId});
+    async save(session: SessionDocument) {
+        await session.save()
     },
 
-    async updateRefreshTokenVersion(version: { iat: number, userId: string, deviceId: string }) {
-        await activeSessionsCollection.updateOne(
-            {userId: version.userId, deviceId: version.deviceId},
-            {$set: {iat: version.iat}}
-        );
-    },
-
-    async deleteSession(refreshTokenMeta: {userId: string, deviceId: string}) {
-        return await activeSessionsCollection.deleteOne(
-            {userId: refreshTokenMeta.userId, deviceId: refreshTokenMeta.deviceId}
-        );
+    async checkRefreshTokenVersion(iat: number, userId: string, deviceId: string): Promise<WithId<SessionDbModel> | null> {
+        return SessionModel.findOne({iat, userId, deviceId}).lean();
     }
 }

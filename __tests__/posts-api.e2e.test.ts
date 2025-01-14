@@ -5,9 +5,10 @@ import {HTTP_STATUSES} from "../src/utils/http-statuses";
 import {fromUTF8ToBase64} from "../src/middlewares/auth/basic-auth-middleware";
 import {blogsTestManager} from "./helpers/blogsTestManager";
 import {MongoMemoryServer} from "mongodb-memory-server";
-import {postsCollection, runDb} from "../src/repositories/db";
 import {ObjectId} from "mongodb";
 import {postsTestManager} from "./helpers/postsTestManager";
+import {runDb} from "../src/db/run-db";
+import {PostModel} from "../src/routes/posts/post.entity";
 
 describe('tests for /posts', async () => {
     let server: MongoMemoryServer;
@@ -20,7 +21,7 @@ describe('tests for /posts', async () => {
     })
 
     beforeEach(async () => {
-        await postsCollection.drop();
+        await PostModel.collection.drop();
     })
 
     const defaultState = {

@@ -3,7 +3,7 @@ dotenv.config()
 
 export const SETTINGS = {
     PORT: process.env.PORT || 3000,
-    MONGO_URI: process.env.MONGO_URL || 'mongodb://0.0.0.0:27017',
+    MONGO_URI: process.env.MONGO_URL || 'mongodb://0.0.0.0:27017/blogs-and-posts',
     ACCESS_TOKEN_SECRET: process.env.ACCESS_TOKEN_SECRET || "access_secret",
     REFRESH_TOKEN_SECRET: process.env.REFRESH_TOKEN_SECRET || "refresh_secret",
     PATH: {

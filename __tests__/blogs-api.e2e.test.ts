@@ -5,8 +5,9 @@ import {HTTP_STATUSES} from "../src/utils/http-statuses";
 import {fromUTF8ToBase64} from "../src/middlewares/auth/basic-auth-middleware";
 import {blogsTestManager} from "./helpers/blogsTestManager";
 import {MongoMemoryServer} from "mongodb-memory-server";
-import {blogsCollection, runDb} from "../src/repositories/db";
 import {ObjectId} from "mongodb";
+import {BlogModel} from "../src/routes/blogs/blog.entity";
+import {runDb} from "../src/db/run-db";
 
 describe('tests for /blogs', async () => {
     let server: MongoMemoryServer;
@@ -19,7 +20,7 @@ describe('tests for /blogs', async () => {
     })
 
     beforeEach(async () => {
-        await blogsCollection.drop();
+        await BlogModel.collection.drop()
     })
 
     const defaultState = {

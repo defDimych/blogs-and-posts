@@ -20,17 +20,17 @@ export const sessionsService = {
     async endSpecifiedSession(requestInfo: {deviceId: string, refreshToken: string}) {
         const decodedPayload = jwtService.getPayloadFromToken(requestInfo.refreshToken);
 
-        const foundSession = await sessionsRepository.findSessionByDeviceId(requestInfo.deviceId);
+        const session = await sessionsRepository.findSessionByDeviceId(requestInfo.deviceId);
 
-        if (!foundSession) {
+        if (!session) {
             return responseFactory.notFound();
         }
 
-        if (foundSession.userId !== decodedPayload.userId) {
+        if (session.userId !== decodedPayload.userId) {
             return responseFactory.forbidden();
         }
 
-        await sessionsRepository.deleteSessionByIdOrThrow(foundSession._id.toString());
+        await session.deleteOne();
 
         return responseFactory.success(null);
     }

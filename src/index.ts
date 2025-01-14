@@ -1,6 +1,7 @@
 import {app} from "./app";
 import {SETTINGS} from "./utils/settings";
-import {runDb} from "./repositories/db";
+import {runDb} from "./db/run-db";
+
 
 app.set("trust proxy", true);
 

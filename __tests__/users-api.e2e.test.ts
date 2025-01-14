@@ -3,8 +3,9 @@ import {SETTINGS} from "../src/utils/settings";
 import {fromUTF8ToBase64} from "../src/middlewares/auth/basic-auth-middleware";
 import {HTTP_STATUSES} from "../src/utils/http-statuses";
 import {MongoMemoryServer} from "mongodb-memory-server";
-import {runDb, usersCollection} from "../src/repositories/db";
 import {usersTestManager} from "./helpers/usersTestManager";
+import {runDb} from "../src/db/run-db";
+import {UserModel} from "../src/routes/users/user.entity";
 
 describe('tests for /users', () => {
     let server: MongoMemoryServer;
@@ -17,7 +18,7 @@ describe('tests for /users', () => {
     })
 
     beforeEach(async () => {
-        await usersCollection.drop();
+        await UserModel.collection.drop();
     })
 
     it('should not create a entity with incorrect input data', async () => {
