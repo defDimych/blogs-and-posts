@@ -6,7 +6,7 @@ import {blogMapper} from "../../utils/mappers";
 import {PaginationType} from "../../routes/helpers/pagination-helper";
 import {BlogModel} from "../../routes/blogs/blog.entity";
 
-class BlogsQueryRepository {
+export class BlogsQueryRepository {
     async getAllBlogs(options: PaginationType): Promise<PaginationModel<BlogViewModel[]>> {
         const filter = options.searchNameTerm
             ? {name: {$regex: options.searchNameTerm, $options: 'i'}}

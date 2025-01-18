@@ -1,11 +1,11 @@
 import {postsRepository} from "../repositories/db-repo/posts-db-repository";
-import {blogsRepository} from "../repositories/db-repo/blogs-db-repository";
 import {responseFactory} from "../utils/object-result";
 import {CreatePostDto} from "../routes/posts/CreatePostDto";
 import {PostModel} from "../routes/posts/post.entity";
 import {UpdatePostDto} from "../routes/posts/UpdatePostDto";
+import {blogRepository} from "../repositories/db-repo/blogs-db-repository";
 
-class PostsService {
+export class PostsService {
     async checkPost(postId: string) {
         const foundPost = await postsRepository.findPostById(postId);
 
@@ -16,7 +16,7 @@ class PostsService {
     }
 
     async createPost(dto: CreatePostDto): Promise<string> {
-        const foundBlog = await blogsRepository.findBlogById(dto.blogId);
+        const foundBlog = await blogRepository.findBlogById(dto.blogId);
         if (!foundBlog) throw new Error('blog for post not found ' + dto.blogId);
 
         const post = new PostModel(dto);

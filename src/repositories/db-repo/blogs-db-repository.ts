@@ -1,7 +1,7 @@
 import {ObjectId} from "mongodb";
 import {BlogDocument, BlogModel} from "../../routes/blogs/blog.entity";
 
-class BlogsRepository {
+export class BlogsRepository {
     async findBlogById(id: string): Promise<BlogDocument | null> {
         return BlogModel.findOne({ _id: new ObjectId(id) });
     }
@@ -17,4 +17,4 @@ class BlogsRepository {
     }
 }
 
-export const blogsRepository = new BlogsRepository();
+export const blogRepository = new BlogsRepository()
