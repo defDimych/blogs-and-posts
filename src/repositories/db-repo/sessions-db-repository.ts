@@ -1,9 +1,9 @@
 import {SessionDocument, SessionModel} from "../../routes/auth/session.entity";
 
-export const sessionsRepository = {
+class SessionsRepository {
     async findSessionByDeviceId(deviceId: string): Promise<SessionDocument | null> {
         return SessionModel.findOne({deviceId})
-    },
+    }
 
     async endSessionsExcludingCurrentOneOrThrow(refreshTokenMeta: {userId: string, deviceId: string, iat: number}) {
         const result = await SessionModel.deleteMany(
@@ -20,3 +20,5 @@ export const sessionsRepository = {
         return true
     }
 }
+
+export const sessionsRepository = new SessionsRepository()

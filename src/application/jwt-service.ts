@@ -8,40 +8,28 @@ interface TokenInterface {
     deviceId:string
 }
 
-export const jwtService = {
-    // createJWTs(userId: string) {
-    //     const accessToken = this.createAccessToken(userId);
-    //     const refreshToken = this.createRefreshTokenWithGenerateDeviceId(userId);
-    //
-    //     return {
-    //         accessToken: {
-    //             accessToken
-    //         },
-    //         refreshToken
-    //     }
-    // },
-
+class JwtService {
     createAccessToken(userId: string) {
         return jwt.sign(
             {userId}, SETTINGS.ACCESS_TOKEN_SECRET, {expiresIn: 10}
         );
-    },
+    }
 
     createRefreshTokenWithGenerateDeviceId(userId: string) {
         return jwt.sign(
             {userId, deviceId: crypto.randomUUID(), iat: Date.now(), exp: Date.now() + (20 * 1000)}, SETTINGS.REFRESH_TOKEN_SECRET
         );
-    },
+    }
 
     createRefreshToken(userId: string, deviceId: string) {
         return jwt.sign(
             {userId, deviceId, iat: Date.now(), exp: Date.now() + (20 * 1000)}, SETTINGS.REFRESH_TOKEN_SECRET
         );
-    },
+    }
 
     getPayloadFromToken(token: string) {
         return jwt.decode(token ) as TokenInterface;
-    },
+    }
 
     verifyRefreshToken(refreshToken: string) {
         try {
@@ -51,7 +39,7 @@ export const jwtService = {
         } catch (err) {
             return null;
         }
-    },
+    }
 
     verifyAccessToken(token: string) {
         try {
@@ -64,3 +52,5 @@ export const jwtService = {
         }
     }
 }
+
+export const jwtService = new JwtService()

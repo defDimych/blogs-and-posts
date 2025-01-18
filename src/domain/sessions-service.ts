@@ -2,7 +2,7 @@ import {jwtService} from "../application/jwt-service";
 import {sessionsRepository} from "../repositories/db-repo/sessions-db-repository";
 import {responseFactory} from "../utils/object-result";
 
-export const sessionsService = {
+class SessionsService {
     async endSessionsExcludingCurrentOne(refreshToken: string) {
         const decodedPayload = jwtService.getPayloadFromToken(refreshToken);
 
@@ -15,7 +15,7 @@ export const sessionsService = {
         await sessionsRepository.endSessionsExcludingCurrentOneOrThrow(refreshTokenMeta);
 
         return responseFactory.success(null);
-    },
+    }
 
     async endSpecifiedSession(requestInfo: {deviceId: string, refreshToken: string}) {
         const decodedPayload = jwtService.getPayloadFromToken(requestInfo.refreshToken);
@@ -35,3 +35,5 @@ export const sessionsService = {
         return responseFactory.success(null);
     }
 }
+
+export const sessionsService = new SessionsService()

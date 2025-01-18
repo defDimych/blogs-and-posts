@@ -4,7 +4,7 @@ import {postsRepository} from "../repositories/db-repo/posts-db-repository";
 import {usersRepository} from "../repositories/db-repo/users-db-repository";
 import {CommentModel} from "../routes/comments/comment.entity";
 
-export const commentsService = {
+class CommentsService {
     async checkComment(commentId: string): Promise<Result<null>> {
         const comment = await commentsRepository.findCommentById(commentId);
 
@@ -12,7 +12,7 @@ export const commentsService = {
             return responseFactory.notFound();
         }
         return responseFactory.success(null);
-    },
+    }
 
     async createComment(postId: string, content: string, userId: string): Promise<Result<null> | Result<string>> {
         const post = await postsRepository.findPostById(postId);
@@ -36,7 +36,7 @@ export const commentsService = {
         const commentId = await commentsRepository.save(comment);
 
         return responseFactory.success(commentId);
-    },
+    }
 
     async updateComment(userId: string, commentId: string, content: string): Promise<Result<null>> {
         const comment = await commentsRepository.findCommentById(commentId);
@@ -54,7 +54,7 @@ export const commentsService = {
         await commentsRepository.save(comment);
 
         return responseFactory.success(null);
-    },
+    }
 
     async deleteComment(userId: string, commentId: string): Promise<Result<null>> {
         const comment = await commentsRepository.findCommentById(commentId);
@@ -72,3 +72,5 @@ export const commentsService = {
         return responseFactory.success(null);
     }
 }
+
+export const commentsService = new CommentsService()

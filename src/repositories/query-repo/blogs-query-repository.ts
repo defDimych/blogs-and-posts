@@ -6,7 +6,7 @@ import {blogMapper} from "../../utils/mappers";
 import {PaginationType} from "../../routes/helpers/pagination-helper";
 import {BlogModel} from "../../routes/blogs/blog.entity";
 
-export const blogsQueryRepository = {
+class BlogsQueryRepository {
     async getAllBlogs(options: PaginationType): Promise<PaginationModel<BlogViewModel[]>> {
         const filter = options.searchNameTerm
             ? {name: {$regex: options.searchNameTerm, $options: 'i'}}
@@ -30,7 +30,7 @@ export const blogsQueryRepository = {
             totalCount: totalCount,
             items: items.map(blogMapper)
         }
-    },
+    }
 
     async findBlogById(id: string): Promise<BlogViewModel | null> {
         const blog: WithId<BlogDbModel> | null = await BlogModel.findOne({ _id: new ObjectId(id) });
@@ -40,7 +40,7 @@ export const blogsQueryRepository = {
         } else {
             return null;
         }
-    },
+    }
 
     async findBlogByIdOrThrow(id: string): Promise<BlogViewModel> {
         const blog: WithId<BlogDbModel> | null = await BlogModel.findOne({ _id: new ObjectId(id) });
@@ -48,7 +48,9 @@ export const blogsQueryRepository = {
         if (blog) {
             return blogMapper(blog);
         } else {
-             throw new Error(`[BlogQueryRepo:findBlogByIdOrThrow] blog with id ${id} not founded`);
+            throw new Error(`[BlogQueryRepo:findBlogByIdOrThrow] blog with id ${id} not founded`);
         }
-    },
+    }
 }
+
+export const blogsQueryRepository = new BlogsQueryRepository()

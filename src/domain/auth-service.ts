@@ -9,7 +9,7 @@ import {emailManager} from "../application/email-manager";
 import {uuid} from "uuidv4";
 import {add} from "date-fns/add";
 
-export const authService = {
+class AuthService {
     async checkCredentials(loginOrEmail: string, password: string) {
         const foundUser = await usersRepository.findUserByLoginOrEmail(loginOrEmail);
 
@@ -27,7 +27,7 @@ export const authService = {
             return responseFactory.unauthorized();
         }
         return responseFactory.success<{userId: string}>({userId:foundUser._id.toString()});
-    },
+    }
 
     async login(requestInfo: {loginOrEmail: string, password: string, IP: string, deviceName: string}) {
         const result = await this.checkCredentials(requestInfo.loginOrEmail, requestInfo.password);
@@ -62,7 +62,7 @@ export const authService = {
         }
 
         return responseFactory.success(tokens);
-    },
+    }
 
     async updateTokens(refreshToken: string) {
         const decodedPayload = jwtService.getPayloadFromToken(refreshToken);
@@ -86,13 +86,13 @@ export const authService = {
         }
 
         return responseFactory.success(tokens);
-    },
+    }
 
     async _generateHash(password: string) {
         const passwordSalt = await bcrypt.genSalt(10);
 
         return bcrypt.hash(password, passwordSalt);
-    },
+    }
 
     async passwordRecovery(email: string): Promise<Result<null>> {
         const user = await usersRepository.findEmail(email);
@@ -105,7 +105,7 @@ export const authService = {
         await emailManager.sendEmailForPasswordRecovery(email, user.passwordRecovery.recoveryCode);
 
         return responseFactory.success(null)
-    },
+    }
 
     async confirmPasswordRecovery(newPassword: string, recoveryCode: string): Promise<Result<null>> {
         const user = await usersRepository.findUserByPasswordRecoveryCode(recoveryCode);
@@ -122,7 +122,7 @@ export const authService = {
         await usersRepository.save(user);
 
         return responseFactory.success(null);
-    },
+    }
 
     async logout(refreshToken: string) {
         const decodedPayload = jwtService.getPayloadFromToken(refreshToken);
@@ -135,3 +135,5 @@ export const authService = {
         return responseFactory.success(null);
     }
 }
+
+export const authService = new AuthService()

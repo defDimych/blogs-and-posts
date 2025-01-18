@@ -9,10 +9,10 @@ import {commentsQueryRepository} from "../../repositories/query-repo/comments-qu
 import {checkInputErrorsMiddleware} from "../../middlewares/check-input-errors-middleware";
 import {accessTokenValidator} from "../../middlewares/auth/access-token-validator";
 
-export const getCommentsRouter = () => {
-    const router = express.Router();
+export const commentsRouter = express.Router()
 
-    router.get('/:commentId', async (req: RequestWithParams<{ commentId: string }>, res: Response) => {
+class CommentsController {
+    async getComment(req: RequestWithParams<{ commentId: string }>, res: Response){
         const result = await commentsService.checkComment(req.params.commentId);
 
         if (result.status !== DomainStatusCode.Success) {
@@ -23,31 +23,31 @@ export const getCommentsRouter = () => {
         const comment = await commentsQueryRepository.findCommentById(req.params.commentId);
 
         res.status(HTTP_STATUSES.SUCCESS_200).send(comment);
-    })
-    router.put('/:commentId',
-        accessTokenValidator,
-        commentInputValidationMiddleware,
-        checkInputErrorsMiddleware,
-        async (req: RequestWithParamsAndBody<{ commentId: string }, CommentInputModel>, res: Response) => {
-            const result = await commentsService.updateComment(req.userId!, req.params.commentId, req.body.content);
+    }
 
-            if (result.status !== DomainStatusCode.Success) {
-                res.sendStatus(handleError(result.status));
-                return;
-            }
-            res.sendStatus(HTTP_STATUSES.NO_CONTENT_204);
-        })
-    router.delete('/:commentId',
-        accessTokenValidator,
-        async (req: RequestWithParams<{ commentId: string }>, res: Response) => {
-            const result = await commentsService.deleteComment(req.userId!, req.params.commentId);
+    async updateComment(req: RequestWithParamsAndBody<{ commentId: string }, CommentInputModel>, res: Response){
+        const result = await commentsService.updateComment(req.userId!, req.params.commentId, req.body.content);
 
-            if (result.status !== DomainStatusCode.Success) {
-                res.sendStatus(handleError(result.status));
-                return
-            }
-            res.sendStatus(HTTP_STATUSES.NO_CONTENT_204);
-        })
+        if (result.status !== DomainStatusCode.Success) {
+            res.sendStatus(handleError(result.status));
+            return;
+        }
+        res.sendStatus(HTTP_STATUSES.NO_CONTENT_204);
+    }
 
-    return router
+    async deleteComment(req: RequestWithParams<{ commentId: string }>, res: Response){
+        const result = await commentsService.deleteComment(req.userId!, req.params.commentId);
+
+        if (result.status !== DomainStatusCode.Success) {
+            res.sendStatus(handleError(result.status));
+            return
+        }
+        res.sendStatus(HTTP_STATUSES.NO_CONTENT_204);
+    }
 }
+
+const commentsController = new CommentsController()
+
+commentsRouter.get('/:commentId', commentsController.getComment)
+commentsRouter.put('/:commentId',accessTokenValidator, commentInputValidationMiddleware, checkInputErrorsMiddleware, commentsController.updateComment)
+commentsRouter.delete('/:commentId',accessTokenValidator, commentsController.deleteComment)

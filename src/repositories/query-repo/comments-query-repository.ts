@@ -6,7 +6,7 @@ import {PaginationModel} from "../../types/PaginationModel";
 import {CommentViewModel} from "../../types/comments-type/CommentViewModel";
 import {CommentModel} from "../../routes/comments/comment.entity";
 
-export const commentsQueryRepository = {
+class CommentsQueryRepository {
     async getAllComments(options: PaginationType, postId: string): Promise<PaginationModel<CommentViewModel[]>> {
         const sortDirection = options.sortDirection === 'asc' ? 1 : -1
 
@@ -31,7 +31,7 @@ export const commentsQueryRepository = {
             console.log(`Comment query repository, getAllComments : ${JSON.stringify(e, null, 2)}`)
             throw new Error(`some error`)
         }
-    },
+    }
 
     async findCommentById(id: string): Promise<CommentViewModel> {
         const comment = await CommentModel.findOne({ _id: new ObjectId(id) }).lean();
@@ -43,3 +43,5 @@ export const commentsQueryRepository = {
         return commentMapper(comment);
     }
 }
+
+export const commentsQueryRepository = new CommentsQueryRepository()

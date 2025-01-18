@@ -15,15 +15,26 @@ import {blogsQueryRepository} from "../../repositories/query-repo/blogs-query-re
 import {postsQueryRepository} from "../../repositories/query-repo/posts-query-repository";
 import {DomainStatusCode, handleError} from "../../utils/object-result";
 
-export const getBlogsRouter = () => {
-    const router = express.Router();
+export const usersRouter = express.Router();
 
-    router.get('/', async (req: RequestWithQuery<PaginationQueryType>, res: Response) => {
+class BlogsController {
+    async getBlog(req: Request, res: Response){
+        const foundBlog = await blogsQueryRepository.findBlogById(req.params.id);
+
+        if (!foundBlog) {
+            res.sendStatus(HTTP_STATUSES.NOT_FOUND_404);
+            return
+        }
+        res.status(HTTP_STATUSES.SUCCESS_200).send(foundBlog);
+    }
+
+    async getBlogs(req: RequestWithQuery<PaginationQueryType>, res: Response){
         const receivedBlogs = await blogsQueryRepository.getAllBlogs(getDefaultPaginationOptions(req.query));
 
         res.status(HTTP_STATUSES.SUCCESS_200).send(receivedBlogs);
-    })
-    router.get('/:blogId/posts', async (req: RequestWithParamsAndQuery<{ blogId: string}, PaginationQueryType>, res: Response) => {
+    }
+
+    async getPostsSpecificBlog(req: RequestWithParamsAndQuery<{blogId: string}, PaginationQueryType>, res: Response){
         const foundBlog = await blogsQueryRepository.findBlogById(req.params.blogId);
 
         if (!foundBlog) {
@@ -34,50 +45,42 @@ export const getBlogsRouter = () => {
         const receivedPosts = await postsQueryRepository.getAllPostsByBlogId(getDefaultPaginationOptions(req.query), foundBlog.id)
 
         res.status(HTTP_STATUSES.SUCCESS_200).send(receivedPosts);
-    })
-    router.post('/', basicAuthMiddleware, ...blogInputValidationMiddlewares, checkInputErrorsMiddleware,
-        async (req: Request<any, any, BlogInputModel>, res: Response) => {
-            const createdBlogId = await blogsService.createBlog(req.body);
-            const createdBlog = await blogsQueryRepository.findBlogByIdOrThrow(createdBlogId)
+    }
 
-            res.status(HTTP_STATUSES.CREATED_201).send(createdBlog);
-        })
-    router.post('/:blogId/posts', basicAuthMiddleware, ...blogPostInputValidationMiddleware, checkInputErrorsMiddleware,
-        async (req: RequestWithParamsAndBody<{ blogId: string }, BlogPostInputModel>, res: Response) => {
-            const foundBlog = await blogsQueryRepository.findBlogById(req.params.blogId);
+    async createBlog(req: Request<any, any, BlogInputModel>, res: Response){
+        const createdBlogId = await blogsService.createBlog(req.body);
+        const createdBlog = await blogsQueryRepository.findBlogByIdOrThrow(createdBlogId)
 
-            if (!foundBlog) {
-                res.sendStatus(HTTP_STATUSES.NOT_FOUND_404);
-                return
-            }
+        res.status(HTTP_STATUSES.CREATED_201).send(createdBlog);
+    }
 
-            const createdPostId = await postsService.createPost({ ...req.body, blogId: req.params.blogId });
-            const createdPost = await postsQueryRepository.findPostById(createdPostId);
-
-            if (!createdPost) return;
-
-            res.status(HTTP_STATUSES.CREATED_201).send(createdPost);
-        })
-    router.get('/:id', async (req: Request, res: Response) => {
-        const foundBlog = await blogsQueryRepository.findBlogById(req.params.id);
+    async createPostForSpecificBlog(req: RequestWithParamsAndBody<{ blogId: string }, BlogPostInputModel>, res: Response){
+        const foundBlog = await blogsQueryRepository.findBlogById(req.params.blogId);
 
         if (!foundBlog) {
             res.sendStatus(HTTP_STATUSES.NOT_FOUND_404);
             return
         }
-        res.status(HTTP_STATUSES.SUCCESS_200).send(foundBlog);
-    })
-    router.put('/:id', basicAuthMiddleware, ...blogInputValidationMiddlewares, checkInputErrorsMiddleware,
-        async (req: Request<any, any, BlogInputModel>, res: Response) => {
-            const result = await blogsService.updateBlog(req.params.id, req.body);
 
-            if (result.status !== DomainStatusCode.Success) {
-                res.sendStatus(handleError(result.status))
-                return
-            }
-            res.sendStatus(HTTP_STATUSES.NO_CONTENT_204);
-        })
-    router.delete('/:id', basicAuthMiddleware, async (req: Request, res: Response) => {
+        const createdPostId = await postsService.createPost({...req.body, blogId: req.params.blogId});
+        const createdPost = await postsQueryRepository.findPostById(createdPostId);
+
+        if (!createdPost) return;
+
+        res.status(HTTP_STATUSES.CREATED_201).send(createdPost);
+    }
+
+    async updateBlog(req: Request<any, any, BlogInputModel>, res: Response){
+        const result = await blogsService.updateBlog(req.params.id, req.body);
+
+        if (result.status !== DomainStatusCode.Success) {
+            res.sendStatus(handleError(result.status))
+            return
+        }
+        res.sendStatus(HTTP_STATUSES.NO_CONTENT_204);
+    }
+
+    async deleteBlog(req: Request, res: Response){
         const isDeleted = await blogsService.deleteBlog(req.params.id);
 
         if (isDeleted) {
@@ -85,7 +88,15 @@ export const getBlogsRouter = () => {
         } else {
             res.sendStatus(HTTP_STATUSES.NOT_FOUND_404);
         }
-    })
-
-    return router;
+    }
 }
+
+const blogsController = new BlogsController()
+
+usersRouter.get('/:id', blogsController.getBlog)
+usersRouter.get('/', blogsController.getBlogs)
+usersRouter.get('/:blogId/posts', blogsController.getPostsSpecificBlog)
+usersRouter.post('/', basicAuthMiddleware, ...blogInputValidationMiddlewares, checkInputErrorsMiddleware, blogsController.createBlog)
+usersRouter.post('/:blogId/posts', basicAuthMiddleware, ...blogPostInputValidationMiddleware, checkInputErrorsMiddleware, blogsController.createPostForSpecificBlog)
+usersRouter.put('/:id', basicAuthMiddleware, ...blogInputValidationMiddlewares, checkInputErrorsMiddleware, blogsController.updateBlog)
+usersRouter.delete('/:id', basicAuthMiddleware, blogsController.deleteBlog)

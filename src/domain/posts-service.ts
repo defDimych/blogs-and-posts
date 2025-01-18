@@ -5,7 +5,7 @@ import {CreatePostDto} from "../routes/posts/CreatePostDto";
 import {PostModel} from "../routes/posts/post.entity";
 import {UpdatePostDto} from "../routes/posts/UpdatePostDto";
 
-export const postsService = {
+class PostsService {
     async checkPost(postId: string) {
         const foundPost = await postsRepository.findPostById(postId);
 
@@ -13,7 +13,7 @@ export const postsService = {
             return responseFactory.notFound();
         }
         return responseFactory.success(null);
-    },
+    }
 
     async createPost(dto: CreatePostDto): Promise<string> {
         const foundBlog = await blogsRepository.findBlogById(dto.blogId);
@@ -24,7 +24,7 @@ export const postsService = {
         post.blogName = foundBlog.name
 
         return postsRepository.save(post);
-    },
+    }
 
     async updatePost(id: string, dto: UpdatePostDto): Promise<boolean> {
         const post = await postsRepository.findPostById(id);
@@ -38,9 +38,11 @@ export const postsService = {
         await postsRepository.save(post)
 
         return true
-    },
+    }
 
     async deletePost(id: string): Promise<boolean> {
         return postsRepository.deletePost(id);
     }
 }
+
+export const postsService = new PostsService()

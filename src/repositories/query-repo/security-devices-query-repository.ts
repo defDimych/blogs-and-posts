@@ -1,7 +1,7 @@
 import {DeviceViewModel} from "../../types/devices-types/DeviceViewModel";
 import {SessionModel} from "../../routes/auth/session.entity";
 
-export const securityDevicesQueryRepository = {
+class SecurityDevicesQueryRepository {
     async getAllActiveSessions(userId: string): Promise<DeviceViewModel[]> {
         const listDevices = await SessionModel.find({userId}).lean()
 
@@ -15,3 +15,5 @@ export const securityDevicesQueryRepository = {
         })
     }
 }
+
+export const securityDevicesQueryRepository = new SecurityDevicesQueryRepository()

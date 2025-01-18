@@ -6,45 +6,45 @@ import {DomainStatusCode, handleError} from "../utils/object-result";
 import {sessionsService} from "../domain/sessions-service";
 import {RequestWithParams} from "../types/request-types";
 
-export const getSecurityDevicesRouter = () => {
-    const router = express.Router()
+export const securityDevicesRouter = express.Router()
 
-    router.get('/',
-        refreshTokenValidator,
-        async (req: Request, res: Response) => {
-            const activeSessions = await securityDevicesQueryRepository.getAllActiveSessions(req.userId!);
+class SecurityDevicesController {
+    async getActiveSessions(req: Request, res: Response){
+        const activeSessions = await securityDevicesQueryRepository.getAllActiveSessions(req.userId!);
 
-            res.status(HTTP_STATUSES.SUCCESS_200).send(activeSessions);
-        })
-    router.delete('/',
-        refreshTokenValidator,
-        async (req: Request, res: Response) => {
-            const result = await sessionsService.endSessionsExcludingCurrentOne(req.cookies.refreshToken);
+        res.status(HTTP_STATUSES.SUCCESS_200).send(activeSessions);
+    }
 
-            if (result.status !== DomainStatusCode.Success) {
-                res.sendStatus(handleError(result.status));
-                return
-            }
+    async deleteSessionsExcludingCurrentOne(req: Request, res: Response){
+        const result = await sessionsService.endSessionsExcludingCurrentOne(req.cookies.refreshToken);
 
-            res.sendStatus(HTTP_STATUSES.NO_CONTENT_204);
-        })
-    router.delete('/:deviceId',
-        refreshTokenValidator,
-        async (req: RequestWithParams<{ deviceId: string }>, res: Response) => {
-            const requestInfo = {
-                deviceId: req.params.deviceId,
-                refreshToken: req.cookies.refreshToken
-            }
+        if (result.status !== DomainStatusCode.Success) {
+            res.sendStatus(handleError(result.status));
+            return
+        }
 
-            const result = await sessionsService.endSpecifiedSession(requestInfo)
+        res.sendStatus(HTTP_STATUSES.NO_CONTENT_204);
+    }
 
-            if (result.status !== DomainStatusCode.Success) {
-                res.sendStatus(handleError(result.status));
-                return
-            }
+    async deleteSpecificSession(req: RequestWithParams<{ deviceId: string }>, res: Response){
+        const requestInfo = {
+            deviceId: req.params.deviceId,
+            refreshToken: req.cookies.refreshToken
+        }
 
-            res.sendStatus(HTTP_STATUSES.NO_CONTENT_204);
-        })
+        const result = await sessionsService.endSpecifiedSession(requestInfo)
 
-    return router
+        if (result.status !== DomainStatusCode.Success) {
+            res.sendStatus(handleError(result.status));
+            return
+        }
+
+        res.sendStatus(HTTP_STATUSES.NO_CONTENT_204);
+    }
 }
+
+const securityDevicesController = new SecurityDevicesController()
+
+securityDevicesRouter.get('/',refreshTokenValidator, securityDevicesController.getActiveSessions)
+securityDevicesRouter.delete('/',refreshTokenValidator, securityDevicesController.deleteSessionsExcludingCurrentOne)
+securityDevicesRouter.delete('/:deviceId',refreshTokenValidator, securityDevicesController.deleteSpecificSession)

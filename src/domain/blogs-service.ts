@@ -3,7 +3,7 @@ import {blogsRepository} from "../repositories/db-repo/blogs-db-repository";
 import {BlogModel} from "../routes/blogs/blog.entity";
 import {responseFactory, Result} from "../utils/object-result";
 
-export const blogsService = {
+class BlogsService {
     async createBlog({ name, description, websiteUrl }: BlogInputModel): Promise<string> {
         const newBlog = {
             name,
@@ -15,7 +15,7 @@ export const blogsService = {
         const blog = new BlogModel(newBlog);
         // some business logic
         return blogsRepository.save(blog);
-    },
+    }
 
     async updateBlog(id: string, inputData: BlogInputModel): Promise<Result<null>> {
         const blog = await blogsRepository.findBlogById(id);
@@ -31,9 +31,11 @@ export const blogsService = {
         await blogsRepository.save(blog);
 
         return responseFactory.success(null);
-    },
+    }
 
     async deleteBlog(id: string): Promise<boolean> {
         return blogsRepository.deleteBlog(id);
     }
 }
+
+export const blogsService = new BlogsService()

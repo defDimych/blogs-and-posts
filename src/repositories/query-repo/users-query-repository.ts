@@ -7,7 +7,7 @@ import {UserDbModel} from "../../types/users-types/UserDbModel";
 import {UserModel} from "../../routes/users/user.entity";
 import {MeInfoViewModel} from "../../types/users-types/MeInfoViewModel";
 
-export const usersQueryRepository = {
+class UsersQueryRepository {
     async getAllUsers(options: PaginationType): Promise<PaginationModel<UserViewModel[]>> {
         const filter = {
             $or: [
@@ -40,7 +40,7 @@ export const usersQueryRepository = {
             console.log(`GET query repository, getAllUsers : ${JSON.stringify(e, null, 2)}`)
             throw new Error(`some error`)
         }
-    },
+    }
 
     async getInfoById(id: string): Promise<MeInfoViewModel | null> {
         const user: WithId<UserDbModel> | null = await UserModel.findOne({ _id: new ObjectId(id) }).lean();
@@ -50,7 +50,7 @@ export const usersQueryRepository = {
         } else {
             return null;
         }
-    },
+    }
 
     async findUserById(id: string): Promise<UserViewModel | null> {
         const user: WithId<UserDbModel> | null = await UserModel.findOne({ _id: new ObjectId(id) }).lean();
@@ -62,3 +62,5 @@ export const usersQueryRepository = {
         }
     }
 }
+
+export const usersQueryRepository = new UsersQueryRepository()

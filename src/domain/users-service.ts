@@ -8,7 +8,7 @@ import {generateErrorMessage} from "../utils/mappers";
 import {CreateUserDto} from "../routes/CreateUserDto";
 import {UserModel} from "../routes/users/user.entity";
 
-export const usersService = {
+class UsersService {
     async checkUnique(login: string, email: string): Promise<Result<null>> {
         const foundLogin = await usersRepository.findLogin(login);
         const foundEmail = await usersRepository.findEmail(email);
@@ -22,7 +22,7 @@ export const usersService = {
         }
 
         return responseFactory.success(null);
-    },
+    }
 
     async createUserWithEmailConfirmation(dto: CreateUserDto): Promise<Result<string | null>> {
         const result = await this.checkUnique(dto.login, dto.email);
@@ -65,7 +65,7 @@ export const usersService = {
         }
 
         return responseFactory.success(userId);
-    },
+    }
 
     async createUser(dto: CreateUserDto): Promise<Result<string | null>> {
         const result = await this.checkUnique(dto.login, dto.email)
@@ -102,17 +102,17 @@ export const usersService = {
         const userId = await usersRepository.save(user);
 
         return responseFactory.success<string>(userId);
-    },
+    }
 
     async deleteUser(id: string): Promise<boolean> {
         return usersRepository.deleteUser(id);
-    },
+    }
 
     async _generateHash(password: string) {
         const passwordSalt = await bcrypt.genSalt(10);
 
         return bcrypt.hash(password, passwordSalt);
-    },
+    }
 
     async emailConfirmation(code: string): Promise<Result<null>> {
         const user = await usersRepository.findUserByConfirmationCode(code);
@@ -134,7 +134,7 @@ export const usersService = {
         await usersRepository.save(user);
 
         return responseFactory.success(null);
-    },
+    }
 
     async emailResending(email: string): Promise<Result<null>> {
         const user = await usersRepository.findEmail(email);
@@ -156,3 +156,5 @@ export const usersService = {
         return responseFactory.success(null);
     }
 }
+
+export const usersService = new UsersService()

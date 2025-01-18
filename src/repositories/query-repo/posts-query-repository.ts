@@ -6,7 +6,7 @@ import {postMapper} from "../../utils/mappers";
 import {PaginationType} from "../../routes/helpers/pagination-helper";
 import {PostModel} from "../../routes/posts/post.entity";
 
-export const postsQueryRepository = {
+class PostsQueryRepository {
     async getAllPostsByBlogId(options: PaginationType, blogId: string): Promise<PaginationModel<PostViewModel[]>> {
         const sortDirection = options.sortDirection === 'asc' ? 1 : -1
 
@@ -31,7 +31,7 @@ export const postsQueryRepository = {
             console.log(`POST db repository, getAllPosts : ${JSON.stringify(e, null, 2)}`)
             throw new Error(`some error`)
         }
-    },
+    }
 
     async getAllPosts(options: PaginationType): Promise<PaginationModel<PostViewModel[]>> {
         const sortDirection = options.sortDirection === 'asc' ? 1 : -1
@@ -57,7 +57,7 @@ export const postsQueryRepository = {
             console.log(`POST db repository, getAllPosts : ${JSON.stringify(e, null, 2)}`)
             throw new Error(`some error`)
         }
-    },
+    }
 
     async findPostById(id: string): Promise<PostViewModel | null> {
         const post: WithId<PostDbModel> | null = await PostModel.findOne({ _id: new ObjectId(id) });
@@ -67,5 +67,7 @@ export const postsQueryRepository = {
         } else {
             return null;
         }
-    },
+    }
 }
+
+export const postsQueryRepository = new PostsQueryRepository()
