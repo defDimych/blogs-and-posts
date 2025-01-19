@@ -1,23 +1,17 @@
-import express, {Request, Response} from "express";
+import {BlogsService} from "../../domain/blogs-service";
+import {PostsService} from "../../domain/posts-service";
+import {BlogsQueryRepository} from "../../repositories/query-repo/blogs-query-repository";
+import {PostsQueryRepository} from "../../repositories/query-repo/posts-query-repository";
+import {Request, Response} from "express";
 import {HTTP_STATUSES} from "../../utils/http-statuses";
-import {BlogInputModel} from "../../types/blogs-types/BlogInputModel";
-import {blogInputValidationMiddlewares} from "../../middlewares/validation/blog-input-validation-middlewares";
-import {basicAuthMiddleware} from "../../middlewares/auth/basic-auth-middleware";
-import {checkInputErrorsMiddleware} from "../../middlewares/check-input-errors-middleware";
-import {BlogsService, blogsService} from "../../domain/blogs-service";
 import {RequestWithParamsAndBody, RequestWithParamsAndQuery, RequestWithQuery} from "../../types/request-types";
-import {BlogPostInputModel} from "../../types/posts-types/BlogPostInputModel";
-import {PostsService, postsService} from "../../domain/posts-service";
 import {PaginationQueryType} from "../../types/PaginationQueryType";
 import {getDefaultPaginationOptions} from "../helpers/pagination-helper";
-import {blogPostInputValidationMiddleware} from "../../middlewares/validation/blog-post-input-validation-middleware";
-import {BlogsQueryRepository, blogsQueryRepository} from "../../repositories/query-repo/blogs-query-repository";
-import {PostsQueryRepository, postsQueryRepository} from "../../repositories/query-repo/posts-query-repository";
+import {BlogInputModel} from "../../types/blogs-types/BlogInputModel";
+import {BlogPostInputModel} from "../../types/posts-types/BlogPostInputModel";
 import {DomainStatusCode, handleError} from "../../utils/object-result";
 
-export const blogsRouter = express.Router();
-
-class BlogsController {
+export class BlogsController {
     constructor(private blogsService: BlogsService,
                 private postsService: PostsService,
                 private blogsQueryRepository: BlogsQueryRepository,
@@ -95,18 +89,3 @@ class BlogsController {
         }
     }
 }
-
-const blogsController = new BlogsController(
-    blogsService,
-    postsService,
-    blogsQueryRepository,
-    postsQueryRepository
-)
-
-blogsRouter.get('/:id', blogsController.getBlog.bind(blogsController))
-blogsRouter.get('/', blogsController.getBlogs.bind(blogsController))
-blogsRouter.get('/:blogId/posts', blogsController.getPostsSpecificBlog.bind(blogsController))
-blogsRouter.post('/', basicAuthMiddleware, ...blogInputValidationMiddlewares, checkInputErrorsMiddleware, blogsController.createBlog.bind(blogsController))
-blogsRouter.post('/:blogId/posts', basicAuthMiddleware, ...blogPostInputValidationMiddleware, checkInputErrorsMiddleware, blogsController.createPostForSpecificBlog.bind(blogsController))
-blogsRouter.put('/:id', basicAuthMiddleware, ...blogInputValidationMiddlewares, checkInputErrorsMiddleware, blogsController.updateBlog.bind(blogsController))
-blogsRouter.delete('/:id', basicAuthMiddleware, blogsController.deleteBlog.bind(blogsController))

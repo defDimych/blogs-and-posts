@@ -20,5 +20,3 @@ export class SessionsRepository {
         return true
     }
 }
-
-export const sessionsRepository = new SessionsRepository()

@@ -16,5 +16,3 @@ export class PostsRepository {
         return !!post;
     }
 }
-
-export const postsRepository = new PostsRepository()

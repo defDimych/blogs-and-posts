@@ -1,6 +1,6 @@
 import {NextFunction, Request, Response} from "express";
 import {HTTP_STATUSES} from "../../utils/http-statuses";
-import {jwtService} from "../../application/jwt-service";
+import {jwtService} from "../../composition-root";
 
 export const accessTokenValidator = async (req: Request, res: Response, next: NextFunction) => {
     const authHeader = req.headers['authorization'];

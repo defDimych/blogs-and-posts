@@ -1,4 +1,4 @@
-import {EmailAdapter, emailAdapter} from "../adapter/email-adapter";
+import {EmailAdapter} from "../adapter/email-adapter";
 
 export class EmailManager {
     constructor(private emailAdapter: EmailAdapter) {}
@@ -26,5 +26,3 @@ export class EmailManager {
         )
     }
 }
-
-export const emailManager = new EmailManager(emailAdapter)

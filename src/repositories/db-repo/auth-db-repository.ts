@@ -15,5 +15,3 @@ export class AuthRepository {
         return SessionModel.findOne({iat, userId, deviceId}).lean();
     }
 }
-
-export const authRepository = new AuthRepository()

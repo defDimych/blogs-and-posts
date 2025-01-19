@@ -1,17 +1,11 @@
-import express, {Request, Response} from "express";
-import {refreshTokenValidator} from "../middlewares/auth/refresh-token-validator";
-import {
-    SecurityDevicesQueryRepository,
-    securityDevicesQueryRepository
-} from "../repositories/query-repo/security-devices-query-repository";
-import {HTTP_STATUSES} from "../utils/http-statuses";
-import {DomainStatusCode, handleError} from "../utils/object-result";
-import {SessionsService, sessionsService} from "../domain/sessions-service";
-import {RequestWithParams} from "../types/request-types";
+import {SessionsService} from "../../domain/sessions-service";
+import {SecurityDevicesQueryRepository} from "../../repositories/query-repo/security-devices-query-repository";
+import {Request, Response} from "express";
+import {HTTP_STATUSES} from "../../utils/http-statuses";
+import {DomainStatusCode, handleError} from "../../utils/object-result";
+import {RequestWithParams} from "../../types/request-types";
 
-export const securityDevicesRouter = express.Router()
-
-class SecurityDevicesController {
+export class SecurityDevicesController {
     constructor(private sessionsService: SessionsService,
                 private securityDevicesQueryRepository: SecurityDevicesQueryRepository) {}
 
@@ -48,12 +42,3 @@ class SecurityDevicesController {
         res.sendStatus(HTTP_STATUSES.NO_CONTENT_204);
     }
 }
-
-const securityDevicesController = new SecurityDevicesController(
-    sessionsService,
-    securityDevicesQueryRepository
-);
-
-securityDevicesRouter.get('/',refreshTokenValidator, securityDevicesController.getActiveSessions.bind(securityDevicesController))
-securityDevicesRouter.delete('/',refreshTokenValidator, securityDevicesController.deleteSessionsExcludingCurrentOne.bind(securityDevicesController))
-securityDevicesRouter.delete('/:deviceId',refreshTokenValidator, securityDevicesController.deleteSpecificSession.bind(securityDevicesController))

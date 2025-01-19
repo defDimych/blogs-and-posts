@@ -47,5 +47,3 @@ export class UsersRepository {
         return !!user
     }
 }
-
-export const usersRepository = new UsersRepository()

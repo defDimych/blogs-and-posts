@@ -1,5 +1,5 @@
-import {JwtService, jwtService} from "../application/jwt-service";
-import {SessionsRepository, sessionsRepository} from "../repositories/db-repo/sessions-db-repository";
+import {JwtService} from "../application/jwt-service";
+import {SessionsRepository} from "../repositories/db-repo/sessions-db-repository";
 import {responseFactory} from "../utils/object-result";
 
 export class SessionsService {
@@ -38,5 +38,3 @@ export class SessionsService {
         return responseFactory.success(null);
     }
 }
-
-export const sessionsService = new SessionsService(sessionsRepository, jwtService)

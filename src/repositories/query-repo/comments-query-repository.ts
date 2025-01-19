@@ -43,5 +43,3 @@ export class CommentsQueryRepository {
         return commentMapper(comment);
     }
 }
-
-export const commentsQueryRepository = new CommentsQueryRepository()

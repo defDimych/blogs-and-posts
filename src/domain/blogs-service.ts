@@ -1,5 +1,5 @@
 import {BlogInputModel} from "../types/blogs-types/BlogInputModel";
-import {blogRepository, BlogsRepository} from "../repositories/db-repo/blogs-db-repository";
+import {BlogsRepository} from "../repositories/db-repo/blogs-db-repository";
 import {BlogModel} from "../routes/blogs/blog.entity";
 import {responseFactory, Result} from "../utils/object-result";
 
@@ -39,5 +39,3 @@ export class BlogsService {
         return this.blogsRepository.deleteBlog(id);
     }
 }
-
-export const blogsService = new BlogsService(blogRepository)

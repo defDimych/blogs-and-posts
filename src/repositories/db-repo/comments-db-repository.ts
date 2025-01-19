@@ -11,5 +11,3 @@ export class CommentsRepository {
         return updatedComment._id.toString()
     }
 }
-
-export const commentsRepository = new CommentsRepository()

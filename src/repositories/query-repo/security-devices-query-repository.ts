@@ -15,5 +15,3 @@ export class SecurityDevicesQueryRepository {
         })
     }
 }
-
-export const securityDevicesQueryRepository = new SecurityDevicesQueryRepository()

@@ -1,11 +1,11 @@
-import {JwtService, jwtService} from "../application/jwt-service";
-import {AuthRepository, authRepository} from "../repositories/db-repo/auth-db-repository";
+import {JwtService} from "../application/jwt-service";
+import {AuthRepository} from "../repositories/db-repo/auth-db-repository";
 import {DomainStatusCode, responseFactory, Result} from "../utils/object-result";
-import {UsersRepository, usersRepository} from "../repositories/db-repo/users-db-repository";
+import {UsersRepository} from "../repositories/db-repo/users-db-repository";
 import bcrypt from "bcrypt";
 import {generateErrorMessage} from "../utils/mappers";
 import {SessionModel} from "../routes/auth/session.entity";
-import {EmailManager, emailManager} from "../application/email-manager";
+import {EmailManager} from "../application/email-manager";
 import {uuid} from "uuidv4";
 import {add} from "date-fns/add";
 
@@ -140,10 +140,3 @@ export class AuthService {
         return responseFactory.success(null);
     }
 }
-
-export const authService = new AuthService(
-    authRepository,
-    usersRepository,
-    jwtService,
-    emailManager
-);

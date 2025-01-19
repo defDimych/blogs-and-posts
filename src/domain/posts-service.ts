@@ -1,9 +1,9 @@
-import {PostsRepository, postsRepository} from "../repositories/db-repo/posts-db-repository";
+import {PostsRepository} from "../repositories/db-repo/posts-db-repository";
 import {responseFactory} from "../utils/object-result";
 import {CreatePostDto} from "../routes/posts/CreatePostDto";
 import {PostModel} from "../routes/posts/post.entity";
 import {UpdatePostDto} from "../routes/posts/UpdatePostDto";
-import {blogRepository, BlogsRepository} from "../repositories/db-repo/blogs-db-repository";
+import {BlogsRepository} from "../repositories/db-repo/blogs-db-repository";
 
 export class PostsService {
     constructor(private postsRepository: PostsRepository,
@@ -47,5 +47,3 @@ export class PostsService {
         return this.postsRepository.deletePost(id);
     }
 }
-
-export const postsService = new PostsService(postsRepository, blogRepository)

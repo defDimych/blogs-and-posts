@@ -1,9 +1,9 @@
-import {UsersRepository, usersRepository} from "../repositories/db-repo/users-db-repository";
+import {UsersRepository} from "../repositories/db-repo/users-db-repository";
 import bcrypt from 'bcrypt';
 import {DomainStatusCode, responseFactory, Result} from "../utils/object-result";
 import {uuid} from "uuidv4";
 import {add} from "date-fns/add";
-import {EmailManager, emailManager} from "../application/email-manager";
+import {EmailManager} from "../application/email-manager";
 import {generateErrorMessage} from "../utils/mappers";
 import {CreateUserDto} from "../routes/CreateUserDto";
 import {UserModel} from "../routes/users/user.entity";
@@ -159,5 +159,3 @@ export class UsersService {
         return responseFactory.success(null);
     }
 }
-
-export const usersService = new UsersService(usersRepository, emailManager)

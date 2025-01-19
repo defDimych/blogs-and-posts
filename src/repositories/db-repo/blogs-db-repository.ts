@@ -16,5 +16,3 @@ export class BlogsRepository {
         return !!blog
     }
 }
-
-export const blogRepository = new BlogsRepository()

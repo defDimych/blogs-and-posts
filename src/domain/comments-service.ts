@@ -1,7 +1,7 @@
-import {CommentsRepository, commentsRepository} from "../repositories/db-repo/comments-db-repository";
+import {CommentsRepository} from "../repositories/db-repo/comments-db-repository";
 import {responseFactory, Result} from "../utils/object-result";
-import {PostsRepository, postsRepository} from "../repositories/db-repo/posts-db-repository";
-import {UsersRepository, usersRepository} from "../repositories/db-repo/users-db-repository";
+import {PostsRepository} from "../repositories/db-repo/posts-db-repository";
+import {UsersRepository} from "../repositories/db-repo/users-db-repository";
 import {CommentModel} from "../routes/comments/comment.entity";
 
 export class CommentsService {
@@ -76,9 +76,3 @@ export class CommentsService {
         return responseFactory.success(null);
     }
 }
-
-export const commentsService = new CommentsService(
-    commentsRepository,
-    postsRepository,
-    usersRepository
-);

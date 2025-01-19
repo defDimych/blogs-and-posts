@@ -52,5 +52,3 @@ export class JwtService {
         }
     }
 }
-
-export const jwtService = new JwtService()
