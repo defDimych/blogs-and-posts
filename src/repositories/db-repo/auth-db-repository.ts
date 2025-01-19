@@ -2,7 +2,7 @@ import {SessionDocument, SessionModel} from "../../routes/auth/session.entity";
 import {WithId} from "mongodb";
 import {SessionDbModel} from "../../types/auth-types/SessionDbModel";
 
-class AuthRepository {
+export class AuthRepository {
     async findSession(userId: string, deviceId: string): Promise<SessionDocument | null> {
         return SessionModel.findOne({userId, deviceId});
     }

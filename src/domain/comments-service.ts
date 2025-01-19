@@ -1,12 +1,16 @@
-import {commentsRepository} from "../repositories/db-repo/comments-db-repository";
+import {CommentsRepository, commentsRepository} from "../repositories/db-repo/comments-db-repository";
 import {responseFactory, Result} from "../utils/object-result";
-import {postsRepository} from "../repositories/db-repo/posts-db-repository";
-import {usersRepository} from "../repositories/db-repo/users-db-repository";
+import {PostsRepository, postsRepository} from "../repositories/db-repo/posts-db-repository";
+import {UsersRepository, usersRepository} from "../repositories/db-repo/users-db-repository";
 import {CommentModel} from "../routes/comments/comment.entity";
 
-class CommentsService {
+export class CommentsService {
+    constructor(private commentsRepository: CommentsRepository,
+                private postsRepository: PostsRepository,
+                private usersRepository: UsersRepository) {}
+
     async checkComment(commentId: string): Promise<Result<null>> {
-        const comment = await commentsRepository.findCommentById(commentId);
+        const comment = await this.commentsRepository.findCommentById(commentId);
 
         if (!comment) {
             return responseFactory.notFound();
@@ -15,13 +19,13 @@ class CommentsService {
     }
 
     async createComment(postId: string, content: string, userId: string): Promise<Result<null> | Result<string>> {
-        const post = await postsRepository.findPostById(postId);
+        const post = await this.postsRepository.findPostById(postId);
 
         if (!post) {
             return responseFactory.notFound();
         }
 
-        const user = await usersRepository.findUserById(userId);
+        const user = await this.usersRepository.findUserById(userId);
 
         const newComment = {
             postId,
@@ -33,13 +37,13 @@ class CommentsService {
         }
 
         const comment = new CommentModel(newComment);
-        const commentId = await commentsRepository.save(comment);
+        const commentId = await this.commentsRepository.save(comment);
 
         return responseFactory.success(commentId);
     }
 
     async updateComment(userId: string, commentId: string, content: string): Promise<Result<null>> {
-        const comment = await commentsRepository.findCommentById(commentId);
+        const comment = await this.commentsRepository.findCommentById(commentId);
 
         if (!comment) {
             return responseFactory.notFound()
@@ -51,13 +55,13 @@ class CommentsService {
 
         comment.content = content;
 
-        await commentsRepository.save(comment);
+        await this.commentsRepository.save(comment);
 
         return responseFactory.success(null);
     }
 
     async deleteComment(userId: string, commentId: string): Promise<Result<null>> {
-        const comment = await commentsRepository.findCommentById(commentId);
+        const comment = await this.commentsRepository.findCommentById(commentId);
 
         if (!comment) {
             return responseFactory.notFound()
@@ -73,4 +77,8 @@ class CommentsService {
     }
 }
 
-export const commentsService = new CommentsService()
+export const commentsService = new CommentsService(
+    commentsRepository,
+    postsRepository,
+    usersRepository
+);

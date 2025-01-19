@@ -8,7 +8,7 @@ interface TokenInterface {
     deviceId:string
 }
 
-class JwtService {
+export class JwtService {
     createAccessToken(userId: string) {
         return jwt.sign(
             {userId}, SETTINGS.ACCESS_TOKEN_SECRET, {expiresIn: 10}

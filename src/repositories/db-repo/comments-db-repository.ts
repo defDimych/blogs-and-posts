@@ -1,7 +1,7 @@
 import {ObjectId} from "mongodb";
 import {CommentDocument, CommentModel} from "../../routes/comments/comment.entity";
 
-class CommentsRepository {
+export class CommentsRepository {
     async findCommentById(commentId: string): Promise<CommentDocument | null> {
         return CommentModel.findOne({ _id: new ObjectId(commentId) })
     }

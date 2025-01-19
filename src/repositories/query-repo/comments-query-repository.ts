@@ -6,7 +6,7 @@ import {PaginationModel} from "../../types/PaginationModel";
 import {CommentViewModel} from "../../types/comments-type/CommentViewModel";
 import {CommentModel} from "../../routes/comments/comment.entity";
 
-class CommentsQueryRepository {
+export class CommentsQueryRepository {
     async getAllComments(options: PaginationType, postId: string): Promise<PaginationModel<CommentViewModel[]>> {
         const sortDirection = options.sortDirection === 'asc' ? 1 : -1
 

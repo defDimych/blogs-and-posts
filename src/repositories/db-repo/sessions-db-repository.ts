@@ -1,6 +1,6 @@
 import {SessionDocument, SessionModel} from "../../routes/auth/session.entity";
 
-class SessionsRepository {
+export class SessionsRepository {
     async findSessionByDeviceId(deviceId: string): Promise<SessionDocument | null> {
         return SessionModel.findOne({deviceId})
     }

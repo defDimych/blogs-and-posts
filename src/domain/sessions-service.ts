@@ -1,10 +1,13 @@
-import {jwtService} from "../application/jwt-service";
-import {sessionsRepository} from "../repositories/db-repo/sessions-db-repository";
+import {JwtService, jwtService} from "../application/jwt-service";
+import {SessionsRepository, sessionsRepository} from "../repositories/db-repo/sessions-db-repository";
 import {responseFactory} from "../utils/object-result";
 
-class SessionsService {
+export class SessionsService {
+    constructor(private sessionsRepository: SessionsRepository,
+                private jwtService: JwtService) {}
+
     async endSessionsExcludingCurrentOne(refreshToken: string) {
-        const decodedPayload = jwtService.getPayloadFromToken(refreshToken);
+        const decodedPayload = this.jwtService.getPayloadFromToken(refreshToken);
 
         const refreshTokenMeta = {
             userId: decodedPayload.userId,
@@ -12,15 +15,15 @@ class SessionsService {
             iat: decodedPayload.iat
         }
 
-        await sessionsRepository.endSessionsExcludingCurrentOneOrThrow(refreshTokenMeta);
+        await this.sessionsRepository.endSessionsExcludingCurrentOneOrThrow(refreshTokenMeta);
 
         return responseFactory.success(null);
     }
 
     async endSpecifiedSession(requestInfo: {deviceId: string, refreshToken: string}) {
-        const decodedPayload = jwtService.getPayloadFromToken(requestInfo.refreshToken);
+        const decodedPayload = this.jwtService.getPayloadFromToken(requestInfo.refreshToken);
 
-        const session = await sessionsRepository.findSessionByDeviceId(requestInfo.deviceId);
+        const session = await this.sessionsRepository.findSessionByDeviceId(requestInfo.deviceId);
 
         if (!session) {
             return responseFactory.notFound();
@@ -36,4 +39,4 @@ class SessionsService {
     }
 }
 
-export const sessionsService = new SessionsService()
+export const sessionsService = new SessionsService(sessionsRepository, jwtService)

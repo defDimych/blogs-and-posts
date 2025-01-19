@@ -1,17 +1,22 @@
-import {jwtService} from "../application/jwt-service";
-import {authRepository} from "../repositories/db-repo/auth-db-repository";
+import {JwtService, jwtService} from "../application/jwt-service";
+import {AuthRepository, authRepository} from "../repositories/db-repo/auth-db-repository";
 import {DomainStatusCode, responseFactory, Result} from "../utils/object-result";
-import {usersRepository} from "../repositories/db-repo/users-db-repository";
+import {UsersRepository, usersRepository} from "../repositories/db-repo/users-db-repository";
 import bcrypt from "bcrypt";
 import {generateErrorMessage} from "../utils/mappers";
 import {SessionModel} from "../routes/auth/session.entity";
-import {emailManager} from "../application/email-manager";
+import {EmailManager, emailManager} from "../application/email-manager";
 import {uuid} from "uuidv4";
 import {add} from "date-fns/add";
 
-class AuthService {
+export class AuthService {
+    constructor(private authRepository: AuthRepository,
+                private usersRepository: UsersRepository,
+                private jwtService: JwtService,
+                private emailManager: EmailManager) {}
+
     async checkCredentials(loginOrEmail: string, password: string) {
-        const foundUser = await usersRepository.findUserByLoginOrEmail(loginOrEmail);
+        const foundUser = await this.usersRepository.findUserByLoginOrEmail(loginOrEmail);
 
         if (!foundUser) {
             return responseFactory.unauthorized();
@@ -37,10 +42,10 @@ class AuthService {
         }
 
         const userId = result.data!.userId;
-        const accessToken = jwtService.createAccessToken(userId);
-        const refreshToken = jwtService.createRefreshTokenWithGenerateDeviceId(userId);
+        const accessToken = this.jwtService.createAccessToken(userId);
+        const refreshToken = this.jwtService.createRefreshTokenWithGenerateDeviceId(userId);
 
-        const decodedPayload = jwtService.getPayloadFromToken(refreshToken);
+        const decodedPayload = this.jwtService.getPayloadFromToken(refreshToken);
 
         const newSession = {
             userId: decodedPayload.userId,
@@ -52,7 +57,7 @@ class AuthService {
         }
 
         const session = new SessionModel(newSession);
-        await authRepository.save(session);
+        await this.authRepository.save(session);
 
         const tokens = {
             accessToken: {
@@ -65,18 +70,18 @@ class AuthService {
     }
 
     async updateTokens(refreshToken: string) {
-        const decodedPayload = jwtService.getPayloadFromToken(refreshToken);
+        const decodedPayload = this.jwtService.getPayloadFromToken(refreshToken);
 
-        const newAccessToken = jwtService.createAccessToken(decodedPayload.userId);
-        const newRefreshToken = jwtService.createRefreshToken(decodedPayload.userId, decodedPayload.deviceId);
+        const newAccessToken = this.jwtService.createAccessToken(decodedPayload.userId);
+        const newRefreshToken = this.jwtService.createRefreshToken(decodedPayload.userId, decodedPayload.deviceId);
 
-        const refreshPayload = jwtService.getPayloadFromToken(newRefreshToken);
+        const refreshPayload = this.jwtService.getPayloadFromToken(newRefreshToken);
 
-        const session = await authRepository.findSession(refreshPayload.userId, refreshPayload.deviceId);
+        const session = await this.authRepository.findSession(refreshPayload.userId, refreshPayload.deviceId);
         if (!session) throw new Error('session not found')
 
         session.iat = refreshPayload.iat
-        await authRepository.save(session)
+        await this.authRepository.save(session)
 
         const tokens = {
             accessToken: {
@@ -95,20 +100,20 @@ class AuthService {
     }
 
     async passwordRecovery(email: string): Promise<Result<null>> {
-        const user = await usersRepository.findEmail(email);
+        const user = await this.usersRepository.findEmail(email);
         if (!user) return responseFactory.success(null);
 
         user.passwordRecovery.recoveryCode = uuid()
         user.passwordRecovery.expirationDate = add(new Date(), {minutes: 15});
 
-        await usersRepository.save(user);
-        await emailManager.sendEmailForPasswordRecovery(email, user.passwordRecovery.recoveryCode);
+        await this.usersRepository.save(user);
+        await this.emailManager.sendEmailForPasswordRecovery(email, user.passwordRecovery.recoveryCode);
 
         return responseFactory.success(null)
     }
 
     async confirmPasswordRecovery(newPassword: string, recoveryCode: string): Promise<Result<null>> {
-        const user = await usersRepository.findUserByPasswordRecoveryCode(recoveryCode);
+        const user = await this.usersRepository.findUserByPasswordRecoveryCode(recoveryCode);
 
         if (!user) {
             return responseFactory.badRequest(generateErrorMessage('recovery code is incorrect', 'recoveryCode'))
@@ -119,15 +124,15 @@ class AuthService {
         }
 
         user.accountData.passwordHash = await this._generateHash(newPassword);
-        await usersRepository.save(user);
+        await this.usersRepository.save(user);
 
         return responseFactory.success(null);
     }
 
     async logout(refreshToken: string) {
-        const decodedPayload = jwtService.getPayloadFromToken(refreshToken);
+        const decodedPayload = this.jwtService.getPayloadFromToken(refreshToken);
 
-        const session = await authRepository.findSession(decodedPayload.userId, decodedPayload.deviceId);
+        const session = await this.authRepository.findSession(decodedPayload.userId, decodedPayload.deviceId);
         if (!session) throw new Error('session not found')
 
         await session.deleteOne()
@@ -136,4 +141,9 @@ class AuthService {
     }
 }
 
-export const authService = new AuthService()
+export const authService = new AuthService(
+    authRepository,
+    usersRepository,
+    jwtService,
+    emailManager
+);

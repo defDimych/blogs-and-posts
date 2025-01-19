@@ -1,13 +1,16 @@
-import {postsRepository} from "../repositories/db-repo/posts-db-repository";
+import {PostsRepository, postsRepository} from "../repositories/db-repo/posts-db-repository";
 import {responseFactory} from "../utils/object-result";
 import {CreatePostDto} from "../routes/posts/CreatePostDto";
 import {PostModel} from "../routes/posts/post.entity";
 import {UpdatePostDto} from "../routes/posts/UpdatePostDto";
-import {blogRepository} from "../repositories/db-repo/blogs-db-repository";
+import {blogRepository, BlogsRepository} from "../repositories/db-repo/blogs-db-repository";
 
 export class PostsService {
+    constructor(private postsRepository: PostsRepository,
+                private blogRepository: BlogsRepository) {}
+
     async checkPost(postId: string) {
-        const foundPost = await postsRepository.findPostById(postId);
+        const foundPost = await this.postsRepository.findPostById(postId);
 
         if (!foundPost) {
             return responseFactory.notFound();
@@ -16,18 +19,18 @@ export class PostsService {
     }
 
     async createPost(dto: CreatePostDto): Promise<string> {
-        const foundBlog = await blogRepository.findBlogById(dto.blogId);
+        const foundBlog = await this.blogRepository.findBlogById(dto.blogId);
         if (!foundBlog) throw new Error('blog for post not found ' + dto.blogId);
 
         const post = new PostModel(dto);
 
         post.blogName = foundBlog.name
 
-        return postsRepository.save(post);
+        return this.postsRepository.save(post);
     }
 
     async updatePost(id: string, dto: UpdatePostDto): Promise<boolean> {
-        const post = await postsRepository.findPostById(id);
+        const post = await this.postsRepository.findPostById(id);
         if (!post) return false
 
         post.blogId = dto.blogId;
@@ -35,14 +38,14 @@ export class PostsService {
         post.shortDescription = dto.shortDescription;
         post.title = dto.title;
 
-        await postsRepository.save(post)
+        await this.postsRepository.save(post)
 
         return true
     }
 
     async deletePost(id: string): Promise<boolean> {
-        return postsRepository.deletePost(id);
+        return this.postsRepository.deletePost(id);
     }
 }
 
-export const postsService = new PostsService()
+export const postsService = new PostsService(postsRepository, blogRepository)

@@ -1,17 +1,20 @@
-import {usersRepository} from "../repositories/db-repo/users-db-repository";
+import {UsersRepository, usersRepository} from "../repositories/db-repo/users-db-repository";
 import bcrypt from 'bcrypt';
 import {DomainStatusCode, responseFactory, Result} from "../utils/object-result";
 import {uuid} from "uuidv4";
 import {add} from "date-fns/add";
-import {emailManager} from "../application/email-manager";
+import {EmailManager, emailManager} from "../application/email-manager";
 import {generateErrorMessage} from "../utils/mappers";
 import {CreateUserDto} from "../routes/CreateUserDto";
 import {UserModel} from "../routes/users/user.entity";
 
-class UsersService {
+export class UsersService {
+    constructor(private usersRepository: UsersRepository,
+                private emailManager: EmailManager) {}
+
     async checkUnique(login: string, email: string): Promise<Result<null>> {
-        const foundLogin = await usersRepository.findLogin(login);
-        const foundEmail = await usersRepository.findEmail(email);
+        const foundLogin = await this.usersRepository.findLogin(login);
+        const foundEmail = await this.usersRepository.findEmail(email);
 
         if (foundLogin) {
             return responseFactory.badRequest(generateErrorMessage('already exists', 'login'));
@@ -57,11 +60,11 @@ class UsersService {
 
         const user = new UserModel(newUser)
 
-        const userId = await usersRepository.save(user);
-        const resultSending = await emailManager.sendEmailForConfirmation(dto.email, newUser.emailConfirmation.confirmationCode);
+        const userId = await this.usersRepository.save(user);
+        const resultSending = await this.emailManager.sendEmailForConfirmation(dto.email, newUser.emailConfirmation.confirmationCode);
 
         if (!resultSending) {
-            await usersRepository.deleteUser(userId);
+            await this.usersRepository.deleteUser(userId);
         }
 
         return responseFactory.success(userId);
@@ -99,13 +102,13 @@ class UsersService {
         }
 
         const user = new UserModel(newUser);
-        const userId = await usersRepository.save(user);
+        const userId = await this.usersRepository.save(user);
 
         return responseFactory.success<string>(userId);
     }
 
     async deleteUser(id: string): Promise<boolean> {
-        return usersRepository.deleteUser(id);
+        return this.usersRepository.deleteUser(id);
     }
 
     async _generateHash(password: string) {
@@ -115,7 +118,7 @@ class UsersService {
     }
 
     async emailConfirmation(code: string): Promise<Result<null>> {
-        const user = await usersRepository.findUserByConfirmationCode(code);
+        const user = await this.usersRepository.findUserByConfirmationCode(code);
 
         if (!user) {
             return responseFactory.badRequest(generateErrorMessage('confirmation code is incorrect', 'code'));
@@ -131,13 +134,13 @@ class UsersService {
 
         user.emailConfirmation.isConfirmed = true
 
-        await usersRepository.save(user);
+        await this.usersRepository.save(user);
 
         return responseFactory.success(null);
     }
 
     async emailResending(email: string): Promise<Result<null>> {
-        const user = await usersRepository.findEmail(email);
+        const user = await this.usersRepository.findEmail(email);
 
         if (!user) {
             return responseFactory.badRequest(generateErrorMessage('Check your email is correct', 'email'));
@@ -150,11 +153,11 @@ class UsersService {
         const newConfirmationCode = uuid();
         user.emailConfirmation.confirmationCode = newConfirmationCode
 
-        await usersRepository.save(user);
-        await emailManager.sendEmailForConfirmation(email, newConfirmationCode);
+        await this.usersRepository.save(user);
+        await this.emailManager.sendEmailForConfirmation(email, newConfirmationCode);
 
         return responseFactory.success(null);
     }
 }
 
-export const usersService = new UsersService()
+export const usersService = new UsersService(usersRepository, emailManager)

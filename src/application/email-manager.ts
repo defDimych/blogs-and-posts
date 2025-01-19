@@ -1,8 +1,10 @@
-import {emailAdapter} from "../adapter/email-adapter";
+import {EmailAdapter, emailAdapter} from "../adapter/email-adapter";
 
-export const emailManager = {
+export class EmailManager {
+    constructor(private emailAdapter: EmailAdapter) {}
+
     async sendEmailForConfirmation(email: string, confirmationCode: string) {
-        return emailAdapter.sendEmail(
+        return this.emailAdapter.sendEmail(
             email,
             'Email confirmation',
             " <h1>Thanks for your registration</h1>\n" +
@@ -10,10 +12,10 @@ export const emailManager = {
             `     <a href='https://somesite.com/confirm-email?code=${confirmationCode}'>complete registration</a>\n` +
             " </p>\n"
         )
-    },
+    }
 
     async sendEmailForPasswordRecovery(email: string, recoveryCode: string) {
-        return emailAdapter.sendEmail(
+        return this.emailAdapter.sendEmail(
             email,
             'Password recovery',
             " <h1>Password recovery</h1>\n" +
@@ -24,3 +26,5 @@ export const emailManager = {
         )
     }
 }
+
+export const emailManager = new EmailManager(emailAdapter)
