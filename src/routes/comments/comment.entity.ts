@@ -14,7 +14,9 @@ const commentSchema = new mongoose.Schema<CommentDbModel>({
     postId: {type: String, required: true},
     content: {type: String, required: true},
     commentatorInfo: {type: commentatorSchema},
-    createdAt: {type: Date, required: true, default: Date.now()}
+    createdAt: {type: Date, required: true, default: ()=> Date.now() },
+    likeCount: {type: Number, required: true, default: 0},
+    dislikeCount: {type: Number, required: true, default: 0}
 })
 
 export const CommentModel = model<CommentDbModel, CommentModel>("Comments", commentSchema);

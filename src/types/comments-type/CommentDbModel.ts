@@ -8,4 +8,6 @@ export type CommentDbModel = {
     content: string;
     commentatorInfo: Commentator
     createdAt: Date;
+    likeCount: number,
+    dislikeCount: number
 }

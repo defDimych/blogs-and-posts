@@ -11,7 +11,7 @@ interface TokenInterface {
 export class JwtService {
     createAccessToken(userId: string) {
         return jwt.sign(
-            {userId}, SETTINGS.ACCESS_TOKEN_SECRET, {expiresIn: 10}
+            {userId}, SETTINGS.ACCESS_TOKEN_SECRET, {expiresIn: '10m'}
         );
     }
 

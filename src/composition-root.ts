@@ -24,6 +24,8 @@ import {SessionsRepository} from "./repositories/db-repo/sessions-db-repository"
 import {SessionsService} from "./domain/sessions-service";
 import {SecurityDevicesQueryRepository} from "./repositories/query-repo/security-devices-query-repository";
 import {SecurityDevicesController} from "./routes/security-devices/security-devices-controller";
+import {LikeRepository} from "./repositories/db-repo/like-db-repository";
+import {LikeService} from "./domain/like-service";
 
 const postsQueryRepository = new PostsQueryRepository()
 export const blogsQueryRepository = new BlogsQueryRepository()
@@ -38,6 +40,7 @@ const commentsRepository = new CommentsRepository()
 const usersRepository = new UsersRepository()
 export const authRepository = new AuthRepository()
 const sessionsRepository = new SessionsRepository()
+const likeRepository = new LikeRepository()
 
 const emailManager = new EmailManager(emailAdapter)
 export const jwtService = new JwtService()
@@ -52,6 +55,7 @@ const blogsService = new BlogsService(blogRepository)
 const postsService = new PostsService(postsRepository, blogRepository)
 const commentsService = new CommentsService(commentsRepository, postsRepository, usersRepository);
 const sessionsService = new SessionsService(sessionsRepository, jwtService)
+const likeService = new LikeService(commentsService, likeRepository, commentsRepository)
 
 export const blogsController = new BlogsController(
     blogsService,
@@ -74,7 +78,8 @@ export const usersController = new UsersController(
 
 export const commentsController = new CommentsController(
     commentsService,
-    commentsQueryRepository
+    commentsQueryRepository,
+    likeService
 );
 
 export const authController = new AuthController(

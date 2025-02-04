@@ -6,6 +6,7 @@ import {UserModel} from "./users/user.entity";
 import {CommentModel} from "./comments/comment.entity";
 import {SessionModel} from "./auth/session.entity";
 import {RequestMetaModel} from "./auth/request-meta.entity";
+import {LikeModel} from "./comments/like.entity";
 
 export const getTestingRouter = () => {
     const router = express.Router();
@@ -17,6 +18,7 @@ export const getTestingRouter = () => {
         await CommentModel.collection.drop();
         await SessionModel.collection.drop();
         await RequestMetaModel.collection.drop();
+        await LikeModel.collection.drop();
 
         res.sendStatus(HTTP_STATUSES.NO_CONTENT_204);
     })

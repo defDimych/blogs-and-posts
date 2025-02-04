@@ -48,7 +48,7 @@ export class PostsController {
         }
 
         const receivedComments =
-            await this.commentsQueryRepository.getAllComments(getDefaultPaginationOptions(req.query), req.params.postId);
+            await this.commentsQueryRepository.getAllComments(getDefaultPaginationOptions(req.query), req.params.postId, req.userId);
 
         res.status(HTTP_STATUSES.SUCCESS_200).send(receivedComments);
     }
@@ -69,7 +69,7 @@ export class PostsController {
             res.sendStatus(handleError(result.status));
             return
         }
-        const createdComment = await this.commentsQueryRepository.findCommentById(result.data!);
+        const createdComment = await this.commentsQueryRepository.getComment(result.data!, req.userId);
 
         res.status(HTTP_STATUSES.CREATED_201).send(createdComment);
     }

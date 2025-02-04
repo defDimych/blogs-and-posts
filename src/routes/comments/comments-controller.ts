@@ -5,10 +5,14 @@ import {Response} from "express";
 import {DomainStatusCode, handleError} from "../../utils/object-result";
 import {HTTP_STATUSES} from "../../utils/http-statuses";
 import {CommentInputModel} from "../../types/comments-type/CommentInputModel";
+import {LikeInputModel} from "./like-types/LikeInputModel";
+import {UpdateLikeStatusDto} from "./UpdateLikeStatusDto";
+import {LikeService} from "../../domain/like-service";
 
 export class CommentsController {
     constructor(private commentsService: CommentsService,
-                private commentsQueryRepository: CommentsQueryRepository) {}
+                private commentsQueryRepository: CommentsQueryRepository,
+                private likeService: LikeService) {}
 
     async getComment(req: RequestWithParams<{ commentId: string }>, res: Response){
         const result = await this.commentsService.checkComment(req.params.commentId);
@@ -18,7 +22,7 @@ export class CommentsController {
             return
         }
 
-        const comment = await this.commentsQueryRepository.findCommentById(req.params.commentId);
+        const comment = await this.commentsQueryRepository.getComment(req.params.commentId, req.userId);
 
         res.status(HTTP_STATUSES.SUCCESS_200).send(comment);
     }
@@ -31,6 +35,22 @@ export class CommentsController {
             return;
         }
         res.sendStatus(HTTP_STATUSES.NO_CONTENT_204);
+    }
+    
+    async updateLikeStatus(req: RequestWithParamsAndBody<{ commentId: string }, LikeInputModel>, res: Response){
+        const dto: UpdateLikeStatusDto = {
+            userId: req.userId,
+            commentId: req.params.commentId,
+            likeStatus: req.body.likeStatus
+        }
+
+        const result = await this.likeService.updateLikeStatus(dto);
+
+        if (result.status !== DomainStatusCode.Success) {
+            res.sendStatus(handleError(result.status));
+            return
+        }
+        res.sendStatus(HTTP_STATUSES.NO_CONTENT_204)
     }
 
     async deleteComment(req: RequestWithParams<{ commentId: string }>, res: Response){
