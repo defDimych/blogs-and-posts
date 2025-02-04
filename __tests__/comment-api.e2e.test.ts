@@ -61,7 +61,7 @@ describe('tests for /comments', () => {
             createdComment = await commentTestManager.createComment(newComment, userInfoDTO)
         })
 
-        it('', async () => {
+        it('like by user 1, then request comment by user 2', async () => {
             const user = {
                 email: `example1@example.com`,
                 login: `backend888`,
@@ -77,34 +77,62 @@ describe('tests for /comments', () => {
 
             access_token_user2 = await authTestManager.login(loginData);
 
-            await req
-                .put(SETTINGS.PATH.COMMENTS + '/' + createdComment.id + '/like-status')
-                .set({"Authorization": "Bearer " + access_token_user1})
-                .send({"likeStatus": "Like"})
-                .expect(HTTP_STATUSES.NO_CONTENT_204);
+            await commentTestManager.updateLikeStatus(createdComment.id, access_token_user1, 'Like');
 
-            const res1 = await req
-                .get(SETTINGS.PATH.COMMENTS + '/' + createdComment.id)
-                .set({"Authorization": "Bearer " + access_token_user1})
-                .expect(HTTP_STATUSES.SUCCESS_200)
+            const res1 = await commentTestManager.getCommentById(createdComment.id, access_token_user1)
 
-            expect(res1.body.likesInfo).toEqual({
+            expect(res1.likesInfo).toEqual({
                 likesCount: 1,
                 dislikesCount: 0,
                 myStatus: Status.Like
             })
 
-            const res2 = await req
-                .get(SETTINGS.PATH.COMMENTS + '/' + createdComment.id)
-                .set({"Authorization": "Bearer " + access_token_user2})
-                .expect(HTTP_STATUSES.SUCCESS_200)
+            const res2 = await commentTestManager.getCommentById(createdComment.id, access_token_user2)
 
-            console.log(res2.body.likesInfo)
-
-            expect(res2.body.likesInfo).toEqual({
+            expect(res2.likesInfo).toEqual({
                 likesCount: 1,
                 dislikesCount: 0,
                 myStatus: Status.None
+            })
+        })
+
+        it ('dislike by user 2, then request comment by user 1', async() => {
+            await commentTestManager.updateLikeStatus(createdComment.id, access_token_user2, 'Dislike');
+
+            const res1 = await commentTestManager.getCommentById(createdComment.id, access_token_user2)
+
+            expect(res1.likesInfo).toEqual({
+                likesCount: 1,
+                dislikesCount: 1,
+                myStatus: Status.Dislike
+            })
+
+            const res2 = await commentTestManager.getCommentById(createdComment.id, access_token_user1)
+
+            expect(res2.likesInfo).toEqual({
+                likesCount: 1,
+                dislikesCount: 1,
+                myStatus: Status.Like
+            })
+        })
+
+        it ('set the status none by user 2, then request by user 1.', async () => {
+            await commentTestManager.updateLikeStatus(createdComment.id, access_token_user2, 'None');
+
+            const res1 = await commentTestManager.getCommentById(createdComment.id, access_token_user2)
+
+            expect(res1.likesInfo).toEqual({
+                likesCount: 1,
+                dislikesCount: 0,
+                myStatus: Status.None
+            })
+
+            const res2 = await commentTestManager.getCommentById(createdComment.id, access_token_user1)
+
+            expect(res2.likesInfo).toEqual({
+                likesCount: 1,
+                dislikesCount: 0,
+                myStatus: Status.Like
             })
         })
     })

@@ -49,5 +49,22 @@ export const commentTestManager = {
         })
 
         return response.body as CommentViewModel
+    },
+
+    async updateLikeStatus(commentId: string, access_token: string, likeStatus: string) {
+        await req
+            .put(SETTINGS.PATH.COMMENTS + '/' + commentId + '/like-status')
+            .set({"Authorization": "Bearer " + access_token})
+            .send({"likeStatus": likeStatus})
+            .expect(HTTP_STATUSES.NO_CONTENT_204);
+    },
+
+    async getCommentById(commentId: string, access_token: string): Promise<CommentViewModel> {
+        const res = await req
+            .get(SETTINGS.PATH.COMMENTS + '/' + commentId)
+            .set({"Authorization": "Bearer " + access_token})
+            .expect(HTTP_STATUSES.SUCCESS_200)
+
+        return res.body as CommentViewModel
     }
 }

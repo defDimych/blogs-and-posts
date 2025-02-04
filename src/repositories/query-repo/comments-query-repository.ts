@@ -24,46 +24,34 @@ export class CommentsQueryRepository {
 
             const totalCount = await CommentModel.countDocuments(filter);
 
+            const ids = items.map(comment => comment._id.toString())
+            const likes = await LikeModel.find({ commentId: {$in: ids}, userId }).lean()
+
+            const joined = items.map(comment => {
+                const like = likes.find(like => like.commentId === comment._id.toString())
+
+                return {
+                    id: comment._id.toString(),
+                    commentatorInfo: {
+                        userId: comment.commentatorInfo.userId,
+                        userLogin: comment.commentatorInfo.userLogin
+                    },
+                    content: comment.content,
+                    createdAt: comment.createdAt.toISOString(),
+                    likesInfo: {
+                        likesCount: comment.likeCount,
+                        dislikesCount: comment.dislikeCount,
+                        myStatus: (!userId || !like) ? Status.None : like.myStatus
+                    }
+                }
+            })
+
             return {
                 pagesCount: Math.ceil(totalCount / options.pageSize),
                 page: options.pageNumber,
                 pageSize: options.pageSize,
                 totalCount: totalCount,
-                items: await Promise.all(items.map(async (comment) => {
-                    const like = await LikeModel.findOne({ commentId: comment._id.toString(), userId });
-
-                    if (!userId || !like) {
-                        return {
-                            id: comment._id.toString(),
-                            commentatorInfo: {
-                                userId: comment.commentatorInfo.userId,
-                                userLogin: comment.commentatorInfo.userLogin
-                            },
-                            content: comment.content,
-                            createdAt: comment.createdAt.toISOString(),
-                            likesInfo: {
-                                likesCount: comment.likeCount,
-                                dislikesCount: comment.dislikeCount,
-                                myStatus: Status.None
-                            }
-                        }
-                    }
-
-                    return {
-                        id: comment._id.toString(),
-                        commentatorInfo: {
-                            userId: comment.commentatorInfo.userId,
-                            userLogin: comment.commentatorInfo.userLogin
-                        },
-                        content: comment.content,
-                        createdAt: comment.createdAt.toISOString(),
-                        likesInfo: {
-                            likesCount: comment.likeCount,
-                            dislikesCount: comment.dislikeCount,
-                            myStatus: like.myStatus
-                        }
-                    }
-                }))
+                items: joined
             }
         } catch (e) {
             console.log(`Comment query repository, getAllComments : ${JSON.stringify(e, null, 2)}`)
@@ -90,23 +78,6 @@ export class CommentsQueryRepository {
 
         const like = await LikeModel.findOne({ commentId: comment._id.toString(), userId });
 
-        if (!userId || !like) {
-            return {
-                id: comment._id.toString(),
-                commentatorInfo: {
-                    userId: comment.commentatorInfo.userId,
-                    userLogin: comment.commentatorInfo.userLogin
-                },
-                content: comment.content,
-                createdAt: comment.createdAt.toISOString(),
-                likesInfo: {
-                    likesCount: comment.likeCount,
-                    dislikesCount: comment.dislikeCount,
-                    myStatus: Status.None
-                }
-            }
-        }
-
         return {
             id: comment._id.toString(),
             commentatorInfo: {
@@ -118,7 +89,7 @@ export class CommentsQueryRepository {
             likesInfo: {
                 likesCount: comment.likeCount,
                 dislikesCount: comment.dislikeCount,
-                myStatus: like.myStatus
+                myStatus: (!userId || !like) ? Status.None : like.myStatus
             }
         }
     }
