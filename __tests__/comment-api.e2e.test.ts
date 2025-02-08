@@ -1,12 +1,9 @@
 import {MongoMemoryServer} from "mongodb-memory-server";
 import {runDb} from "../src/db/run-db";
 import {commentTestManager} from "./helpers/commentTestManager";
-import {req} from "./helpers/test-helpers";
-import {SETTINGS} from "../src/utils/settings";
 import {CommentViewModel} from "../src/types/comments-type/CommentViewModel";
 import {usersTestManager} from "./helpers/usersTestManager";
 import {authTestManager} from "./helpers/authTestManager";
-import {HTTP_STATUSES} from "../src/utils/http-statuses";
 import {Status} from "../src/routes/comments/like.entity";
 
 export type userInfoDTO = {
@@ -133,6 +130,26 @@ describe('tests for /comments', () => {
                 likesCount: 1,
                 dislikesCount: 0,
                 myStatus: Status.Like
+            })
+        })
+
+        it ('should not change the data when sending a status that is already set', async() => {
+            await commentTestManager.updateLikeStatus(createdComment.id, access_token_user1, 'Like');
+
+            const res1 = await commentTestManager.getCommentById(createdComment.id, access_token_user1)
+
+            expect(res1.likesInfo).toEqual({
+                likesCount: 1,
+                dislikesCount: 0,
+                myStatus: Status.Like
+            })
+
+            const res2 = await commentTestManager.getCommentById(createdComment.id, access_token_user2)
+
+            expect(res2.likesInfo).toEqual({
+                likesCount: 1,
+                dislikesCount: 0,
+                myStatus: Status.None
             })
         })
     })
