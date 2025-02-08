@@ -4,7 +4,7 @@ import {DomainStatusCode, responseFactory} from "../utils/object-result";
 import {LikeRepository} from "../repositories/db-repo/like-db-repository";
 import {CreateLikeDto} from "../routes/comments/CreateLikeDto";
 import {CommentsRepository} from "../repositories/db-repo/comments-db-repository";
-import {LikeModel} from "../routes/comments/like.entity";
+import {LikeModel, Status} from "../routes/comments/like.entity";
 
 export class LikeService {
     constructor(private commentsService: CommentsService,
@@ -15,18 +15,18 @@ export class LikeService {
         const comment = await this.commentsRepository.findCommentById(commentId)
         if (!comment) throw new Error('Comment not found')
 
-        if (currentStatus === "None" && likeStatus === "Like") {
+        if (currentStatus === Status.None && likeStatus === Status.Like) {
             comment.likeCount++
-        } else if (currentStatus === "None" && likeStatus === "Dislike") {
+        } else if (currentStatus === Status.None && likeStatus === Status.Dislike) {
             comment.dislikeCount++
-        } else if (currentStatus === "Like" && likeStatus === "None") {
+        } else if (currentStatus === Status.Like && likeStatus === Status.None) {
             comment.likeCount--
-        } else if (currentStatus === "Dislike" && likeStatus === "None") {
+        } else if (currentStatus === Status.Dislike && likeStatus === Status.None) {
             comment.dislikeCount--
-        } else if (currentStatus === "Like" && likeStatus === "Dislike") {
+        } else if (currentStatus === Status.Like && likeStatus === Status.Dislike) {
             comment.likeCount--
             comment.dislikeCount++
-        } else if (currentStatus === "Dislike" && likeStatus === "Like") {
+        } else if (currentStatus === Status.Dislike && likeStatus === Status.Like) {
             comment.dislikeCount--
             comment.likeCount++
         }
