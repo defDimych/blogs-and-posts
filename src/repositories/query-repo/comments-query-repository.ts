@@ -15,20 +15,26 @@ export class CommentsQueryRepository {
         const sortDirection = options.sortDirection === 'asc' ? 1 : -1
 
         try {
-            const items: WithId<CommentDbModel>[] = await CommentModel
+            const commentsPromise = CommentModel
                 .find(filter)
                 .sort({[options.sortBy]: sortDirection})
                 .skip((options.pageNumber - 1) * options.pageSize)
                 .limit(options.pageSize)
                 .lean()
 
-            const totalCount = await CommentModel.countDocuments(filter);
+            const totalCountPromise = CommentModel.countDocuments(filter);
+            const [comments, totalCount] = await Promise.all([commentsPromise, totalCountPromise]);
 
-            const ids = items.map(comment => comment._id.toString())
+            const ids = comments.map(comment => comment._id.toString())
             const likes = await LikeModel.find({ commentId: {$in: ids}, userId }).lean()
 
-            const joined = items.map(comment => {
-                const like = likes.find(like => like.commentId === comment._id.toString())
+            const dictionaryLikes = likes.reduce((dict, like) => {
+                dict.set(like.commentId, like.myStatus)
+                return dict
+            }, new Map())
+
+            const viewItems = comments.map(comment => {
+                const status: Status | undefined = dictionaryLikes.get(comment._id.toString())
 
                 return {
                     id: comment._id.toString(),
@@ -41,7 +47,7 @@ export class CommentsQueryRepository {
                     likesInfo: {
                         likesCount: comment.likeCount,
                         dislikesCount: comment.dislikeCount,
-                        myStatus: (!userId || !like) ? Status.None : like.myStatus
+                        myStatus: (!userId || !status) ? Status.None : status
                     }
                 }
             })
@@ -51,7 +57,7 @@ export class CommentsQueryRepository {
                 page: options.pageNumber,
                 pageSize: options.pageSize,
                 totalCount: totalCount,
-                items: joined
+                items: viewItems
             }
         } catch (e) {
             console.log(`Comment query repository, getAllComments : ${JSON.stringify(e, null, 2)}`)
