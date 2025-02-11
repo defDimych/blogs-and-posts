@@ -10,12 +10,14 @@ import {getDefaultPaginationOptions} from "../helpers/pagination-helper";
 import {BlogInputModel} from "../../types/blogs-types/BlogInputModel";
 import {BlogPostInputModel} from "../../types/posts-types/BlogPostInputModel";
 import {DomainStatusCode, handleError} from "../../utils/object-result";
+import {inject, injectable} from "inversify";
 
+@injectable()
 export class BlogsController {
-    constructor(private blogsService: BlogsService,
-                private postsService: PostsService,
-                private blogsQueryRepository: BlogsQueryRepository,
-                private postsQueryRepository: PostsQueryRepository) {}
+    constructor(@inject(BlogsService) private blogsService: BlogsService,
+                @inject(PostsService) private postsService: PostsService,
+                @inject(BlogsQueryRepository) private blogsQueryRepository: BlogsQueryRepository,
+                @inject(PostsQueryRepository) private postsQueryRepository: PostsQueryRepository) {}
 
     async getBlog(req: Request, res: Response){
         const foundBlog = await this.blogsQueryRepository.findBlogById(req.params.id);

@@ -1,3 +1,4 @@
+import "reflect-metadata"
 import {BlogsRepository} from "./repositories/db-repo/blogs-db-repository";
 import {BlogsService} from "./domain/blogs-service";
 import {PostsRepository} from "./repositories/db-repo/posts-db-repository";
@@ -26,15 +27,13 @@ import {SecurityDevicesQueryRepository} from "./repositories/query-repo/security
 import {SecurityDevicesController} from "./routes/security-devices/security-devices-controller";
 import {LikeRepository} from "./repositories/db-repo/like-db-repository";
 import {LikeService} from "./domain/like-service";
+import {Container} from "inversify";
 
-const postsQueryRepository = new PostsQueryRepository()
-export const blogsQueryRepository = new BlogsQueryRepository()
 const commentsQueryRepository = new CommentsQueryRepository()
 const usersQueryRepository = new UsersQueryRepository()
 const securityDevicesQueryRepository = new SecurityDevicesQueryRepository()
 
 const emailAdapter = new EmailAdapter()
-const blogRepository = new BlogsRepository()
 const postsRepository = new PostsRepository()
 const commentsRepository = new CommentsRepository()
 const usersRepository = new UsersRepository()
@@ -51,25 +50,9 @@ const authService = new AuthService(
     emailManager
 );
 const usersService = new UsersService(usersRepository, emailManager)
-const blogsService = new BlogsService(blogRepository)
-const postsService = new PostsService(postsRepository, blogRepository)
 const commentsService = new CommentsService(commentsRepository, postsRepository, usersRepository);
 const sessionsService = new SessionsService(sessionsRepository, jwtService)
 const likeService = new LikeService(commentsService, likeRepository, commentsRepository)
-
-export const blogsController = new BlogsController(
-    blogsService,
-    postsService,
-    blogsQueryRepository,
-    postsQueryRepository
-);
-
-export const postsController = new PostsController(
-    postsService,
-    postsQueryRepository,
-    commentsQueryRepository,
-    commentsService
-);
 
 export const usersController = new UsersController(
     usersService,
@@ -92,3 +75,20 @@ export const securityDevicesController = new SecurityDevicesController(
     sessionsService,
     securityDevicesQueryRepository
 );
+
+export const container: Container = new Container();
+
+container.bind(BlogsController).to(BlogsController)
+container.bind(PostsController).to(PostsController)
+
+container.bind(BlogsService).to(BlogsService)
+container.bind(PostsService).to(PostsService)
+container.bind(CommentsService).to(CommentsService)
+
+container.bind(BlogsRepository).to(BlogsRepository)
+container.bind(PostsRepository).to(PostsRepository)
+container.bind(CommentsRepository).to(CommentsRepository)
+container.bind(UsersRepository).to(UsersRepository)
+container.bind(BlogsQueryRepository).to(BlogsQueryRepository)
+container.bind(PostsQueryRepository).to(PostsQueryRepository)
+container.bind(CommentsQueryRepository).to(CommentsQueryRepository)

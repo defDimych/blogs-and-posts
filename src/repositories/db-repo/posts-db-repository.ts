@@ -1,6 +1,8 @@
 import {ObjectId} from "mongodb";
 import {PostDocument, PostModel} from "../../routes/posts/post.entity";
+import {injectable} from "inversify";
 
+@injectable()
 export class PostsRepository {
     async findPostById(postId: string): Promise<PostDocument | null> {
         return PostModel.findOne({ _id: new ObjectId(postId) })

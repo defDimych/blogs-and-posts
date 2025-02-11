@@ -4,10 +4,12 @@ import {CreatePostDto} from "../routes/posts/CreatePostDto";
 import {PostModel} from "../routes/posts/post.entity";
 import {UpdatePostDto} from "../routes/posts/UpdatePostDto";
 import {BlogsRepository} from "../repositories/db-repo/blogs-db-repository";
+import {inject, injectable} from "inversify";
 
+@injectable()
 export class PostsService {
-    constructor(private postsRepository: PostsRepository,
-                private blogRepository: BlogsRepository) {}
+    constructor(@inject(PostsRepository) private postsRepository: PostsRepository,
+                @inject(BlogsRepository) private blogRepository: BlogsRepository) {}
 
     async checkPost(postId: string) {
         const foundPost = await this.postsRepository.findPostById(postId);

@@ -15,12 +15,14 @@ import {HTTP_STATUSES} from "../../utils/http-statuses";
 import {DomainStatusCode, handleError} from "../../utils/object-result";
 import {PostInputModel} from "../../types/posts-types/PostInputModel";
 import {CommentInputModel} from "../../types/comments-type/CommentInputModel";
+import {inject, injectable} from "inversify";
 
+@injectable()
 export class PostsController {
-    constructor(private postsService: PostsService,
-                private postsQueryRepository: PostsQueryRepository,
-                private commentsQueryRepository: CommentsQueryRepository,
-                private commentsService: CommentsService) {}
+    constructor(@inject(PostsService) private postsService: PostsService,
+                @inject(PostsQueryRepository) private postsQueryRepository: PostsQueryRepository,
+                @inject(CommentsQueryRepository) private commentsQueryRepository: CommentsQueryRepository,
+                @inject(CommentsService) private commentsService: CommentsService) {}
 
     async getPosts(req: RequestWithQuery<PaginationQueryType>, res: Response){
         const sorting: PaginationQueryType = req.query

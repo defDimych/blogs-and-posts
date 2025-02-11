@@ -5,7 +5,9 @@ import {PaginationModel} from "../../types/PaginationModel";
 import {CommentViewModel} from "../../types/comments-type/CommentViewModel";
 import {CommentModel} from "../../routes/comments/comment.entity";
 import {LikeDB, LikeModel, Status} from "../../routes/comments/like.entity";
+import {injectable} from "inversify";
 
+@injectable()
 export class CommentsQueryRepository {
     async getAllComments(options: PaginationType, postId: string, userId: string): Promise<PaginationModel<CommentViewModel[]>> {
         const filter = userId

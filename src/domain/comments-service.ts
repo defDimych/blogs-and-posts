@@ -3,11 +3,13 @@ import {responseFactory, Result} from "../utils/object-result";
 import {PostsRepository} from "../repositories/db-repo/posts-db-repository";
 import {UsersRepository} from "../repositories/db-repo/users-db-repository";
 import {CommentModel} from "../routes/comments/comment.entity";
+import {inject, injectable} from "inversify";
 
+@injectable()
 export class CommentsService {
-    constructor(private commentsRepository: CommentsRepository,
-                private postsRepository: PostsRepository,
-                private usersRepository: UsersRepository) {}
+    constructor(@inject(CommentsRepository) private commentsRepository: CommentsRepository,
+                @inject(PostsRepository) private postsRepository: PostsRepository,
+                @inject(UsersRepository) private usersRepository: UsersRepository) {}
 
     async checkComment(commentId: string): Promise<Result<null>> {
         const comment = await this.commentsRepository.findCommentById(commentId);

@@ -5,7 +5,9 @@ import {BlogDbModel} from "../../types/blogs-types/BlogDbModel";
 import {blogMapper} from "../../utils/mappers";
 import {PaginationType} from "../../routes/helpers/pagination-helper";
 import {BlogModel} from "../../routes/blogs/blog.entity";
+import {injectable} from "inversify";
 
+@injectable()
 export class BlogsQueryRepository {
     async getAllBlogs(options: PaginationType): Promise<PaginationModel<BlogViewModel[]>> {
         const filter = options.searchNameTerm

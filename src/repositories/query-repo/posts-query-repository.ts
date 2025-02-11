@@ -5,7 +5,9 @@ import {PostDbModel} from "../../types/posts-types/PostDbModel";
 import {postMapper} from "../../utils/mappers";
 import {PaginationType} from "../../routes/helpers/pagination-helper";
 import {PostModel} from "../../routes/posts/post.entity";
+import {injectable} from "inversify";
 
+@injectable()
 export class PostsQueryRepository {
     async getAllPostsByBlogId(options: PaginationType, blogId: string): Promise<PaginationModel<PostViewModel[]>> {
         const sortDirection = options.sortDirection === 'asc' ? 1 : -1

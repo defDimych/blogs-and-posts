@@ -4,8 +4,11 @@ import {checkInputErrorsMiddleware} from "../../middlewares/check-input-errors-m
 import {postInputValidationMiddlewares} from "../../middlewares/validation/post-input-validation-middlewares";
 import {commentInputValidationMiddleware} from "../../middlewares/validation/comment-input-validation-middleware";
 import {accessTokenValidator} from "../../middlewares/auth/access-token-validator";
-import {postsController} from "../../composition-root";
 import {userAuthentication} from "../../middlewares/auth/user-authentication";
+import {container} from "../../composition-root";
+import {PostsController} from "./posts-controller";
+
+const postsController = container.resolve(PostsController)
 
 export const postsRouter = express.Router()
 
