@@ -6,7 +6,9 @@ import {UserViewModel} from "../../types/users-types/UserViewModel";
 import {UserDbModel} from "../../types/users-types/UserDbModel";
 import {UserModel} from "../../routes/users/user.entity";
 import {MeInfoViewModel} from "../../types/users-types/MeInfoViewModel";
+import {injectable} from "inversify";
 
+@injectable()
 export class UsersQueryRepository {
     async getAllUsers(options: PaginationType): Promise<PaginationModel<UserViewModel[]>> {
         const filter = {

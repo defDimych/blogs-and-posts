@@ -1,6 +1,11 @@
 import {NextFunction, Request, Response} from "express";
 import {HTTP_STATUSES} from "../../utils/http-statuses";
-import {authRepository, jwtService} from "../../composition-root";
+import {container} from "../../composition-root";
+import {JwtService} from "../../application/jwt-service";
+import {AuthRepository} from "../../repositories/db-repo/auth-db-repository";
+
+const jwtService = container.resolve(JwtService)
+const authRepository = container.resolve(AuthRepository)
 
 export const refreshTokenValidator = async (req: Request, res: Response, next: NextFunction) => {
     const refreshToken = req.cookies.refreshToken;

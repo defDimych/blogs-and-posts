@@ -1,6 +1,9 @@
 import express from "express";
 import {refreshTokenValidator} from "../../middlewares/auth/refresh-token-validator";
-import {securityDevicesController} from "../../composition-root";
+import {container} from "../../composition-root";
+import {SecurityDevicesController} from "./security-devices-controller";
+
+const securityDevicesController = container.resolve(SecurityDevicesController)
 
 export const securityDevicesRouter = express.Router()
 

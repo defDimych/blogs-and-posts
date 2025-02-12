@@ -7,10 +7,12 @@ import {EmailManager} from "../application/email-manager";
 import {generateErrorMessage} from "../utils/mappers";
 import {CreateUserDto} from "../routes/CreateUserDto";
 import {UserModel} from "../routes/users/user.entity";
+import {inject, injectable} from "inversify";
 
+@injectable()
 export class UsersService {
-    constructor(private usersRepository: UsersRepository,
-                private emailManager: EmailManager) {}
+    constructor(@inject(UsersRepository) private usersRepository: UsersRepository,
+                @inject(EmailManager) private emailManager: EmailManager) {}
 
     async checkUnique(login: string, email: string): Promise<Result<null>> {
         const foundLogin = await this.usersRepository.findLogin(login);

@@ -2,7 +2,10 @@ import express from "express";
 import {basicAuthMiddleware} from "../../middlewares/auth/basic-auth-middleware";
 import {userInputValidationMiddleware} from "../../middlewares/validation/user-input-validation-middleware";
 import {checkInputErrorsMiddleware} from "../../middlewares/check-input-errors-middleware";
-import {usersController} from "../../composition-root";
+import {container} from "../../composition-root";
+import {UsersController} from "./users-controller";
+
+const usersController = container.resolve(UsersController);
 
 export const usersRouter = express.Router()
 

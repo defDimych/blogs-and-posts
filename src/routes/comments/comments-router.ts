@@ -2,9 +2,12 @@ import express from "express";
 import {commentInputValidationMiddleware} from "../../middlewares/validation/comment-input-validation-middleware";
 import {checkInputErrorsMiddleware} from "../../middlewares/check-input-errors-middleware";
 import {accessTokenValidator} from "../../middlewares/auth/access-token-validator";
-import {commentsController} from "../../composition-root";
 import {likeStatusValidator} from "../../middlewares/validation/like-status-validator";
 import {userAuthentication} from "../../middlewares/auth/user-authentication";
+import {container} from "../../composition-root";
+import {CommentsController} from "./comments-controller";
+
+const commentsController = container.resolve(CommentsController)
 
 export const commentsRouter = express.Router()
 

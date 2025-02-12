@@ -7,10 +7,12 @@ import {getDefaultPaginationOptions} from "../helpers/pagination-helper";
 import {HTTP_STATUSES} from "../../utils/http-statuses";
 import {UserInputModel} from "../../types/users-types/UserInputModel";
 import {DomainStatusCode, handleError} from "../../utils/object-result";
+import {inject, injectable} from "inversify";
 
+@injectable()
 export class UsersController {
-    constructor(private usersService: UsersService,
-                private usersQueryRepository: UsersQueryRepository) {}
+    constructor(@inject(UsersService) private usersService: UsersService,
+                @inject(UsersQueryRepository) private usersQueryRepository: UsersQueryRepository) {}
 
     async getUsers(req: RequestWithQuery<PaginationQueryType>, res: Response){
         const receivedUsers = await this.usersQueryRepository.getAllUsers(getDefaultPaginationOptions(req.query));

@@ -8,11 +8,13 @@ import {LoginInputModel} from "../../types/auth-types/LoginInputModel";
 import {DomainStatusCode, handleError} from "../../utils/object-result";
 import {UserInputModel} from "../../types/users-types/UserInputModel";
 import {NewPasswordRecoveryInputModel} from "../../types/auth-types/NewPasswordRecoveryInputModel";
+import {inject, injectable} from "inversify";
 
+@injectable()
 export class AuthController {
-    constructor(private authService: AuthService,
-                private usersQueryRepository: UsersQueryRepository,
-                private usersService: UsersService) {}
+    constructor(@inject(AuthService) private authService: AuthService,
+                @inject(UsersQueryRepository) private usersQueryRepository: UsersQueryRepository,
+                @inject(UsersService) private usersService: UsersService) {}
 
     async getInfoUser(req: Request, res: Response){
         const infoCurrentUser = await this.usersQueryRepository.getInfoById(req.userId!);

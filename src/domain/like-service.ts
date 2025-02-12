@@ -5,11 +5,13 @@ import {LikeRepository} from "../repositories/db-repo/like-db-repository";
 import {CreateLikeDto} from "../routes/comments/CreateLikeDto";
 import {CommentsRepository} from "../repositories/db-repo/comments-db-repository";
 import {LikeModel, Status} from "../routes/comments/like.entity";
+import {inject, injectable} from "inversify";
 
+@injectable()
 export class LikeService {
-    constructor(private commentsService: CommentsService,
-                private likeRepository: LikeRepository,
-                private commentsRepository: CommentsRepository) {}
+    constructor(@inject(CommentsService) private commentsService: CommentsService,
+                @inject(LikeRepository) private likeRepository: LikeRepository,
+                @inject(CommentsRepository) private commentsRepository: CommentsRepository) {}
 
     async calculateLikes(likeStatus: string, currentStatus: string, commentId: string) {
         const comment = await this.commentsRepository.findCommentById(commentId)

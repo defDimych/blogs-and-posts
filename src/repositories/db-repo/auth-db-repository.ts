@@ -1,7 +1,9 @@
 import {SessionDocument, SessionModel} from "../../routes/auth/session.entity";
 import {WithId} from "mongodb";
 import {SessionDbModel} from "../../types/auth-types/SessionDbModel";
+import {injectable} from "inversify";
 
+@injectable()
 export class AuthRepository {
     async findSession(userId: string, deviceId: string): Promise<SessionDocument | null> {
         return SessionModel.findOne({userId, deviceId});

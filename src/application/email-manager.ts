@@ -1,7 +1,9 @@
 import {EmailAdapter} from "../adapter/email-adapter";
+import {inject, injectable} from "inversify";
 
+@injectable()
 export class EmailManager {
-    constructor(private emailAdapter: EmailAdapter) {}
+    constructor(@inject(EmailAdapter) private emailAdapter: EmailAdapter) {}
 
     async sendEmailForConfirmation(email: string, confirmationCode: string) {
         return this.emailAdapter.sendEmail(

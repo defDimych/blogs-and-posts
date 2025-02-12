@@ -4,10 +4,12 @@ import {Request, Response} from "express";
 import {HTTP_STATUSES} from "../../utils/http-statuses";
 import {DomainStatusCode, handleError} from "../../utils/object-result";
 import {RequestWithParams} from "../../types/request-types";
+import {inject, injectable} from "inversify";
 
+@injectable()
 export class SecurityDevicesController {
-    constructor(private sessionsService: SessionsService,
-                private securityDevicesQueryRepository: SecurityDevicesQueryRepository) {}
+    constructor(@inject(SessionsService) private sessionsService: SessionsService,
+                @inject(SecurityDevicesQueryRepository) private securityDevicesQueryRepository: SecurityDevicesQueryRepository) {}
 
     async getActiveSessions(req: Request, res: Response){
         const activeSessions = await this.securityDevicesQueryRepository.getAllActiveSessions(req.userId!);

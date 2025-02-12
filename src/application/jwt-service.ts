@@ -1,5 +1,6 @@
 import jwt from "jsonwebtoken";
 import {SETTINGS} from "../utils/settings";
+import {injectable} from "inversify";
 
 interface TokenInterface {
     userId: string;
@@ -8,6 +9,7 @@ interface TokenInterface {
     deviceId:string
 }
 
+@injectable()
 export class JwtService {
     createAccessToken(userId: string) {
         return jwt.sign(

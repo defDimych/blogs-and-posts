@@ -7,7 +7,10 @@ import {refreshTokenValidator} from "../../middlewares/auth/refresh-token-valida
 import {accessTokenValidator} from "../../middlewares/auth/access-token-validator";
 import {rateLimiter} from "../../middlewares/auth/rate-limiter";
 import {passRecoveryInputValidation} from "../../middlewares/validation/pass-recovery-input-validation";
-import {authController} from "../../composition-root";
+import {container} from "../../composition-root";
+import {AuthController} from "./auth-controller";
+
+const authController = container.resolve(AuthController)
 
 export const authRouter = express.Router()
 

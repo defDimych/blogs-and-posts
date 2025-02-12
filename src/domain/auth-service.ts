@@ -8,12 +8,14 @@ import {SessionModel} from "../routes/auth/session.entity";
 import {EmailManager} from "../application/email-manager";
 import {uuid} from "uuidv4";
 import {add} from "date-fns/add";
+import {inject, injectable} from "inversify";
 
+@injectable()
 export class AuthService {
-    constructor(private authRepository: AuthRepository,
-                private usersRepository: UsersRepository,
-                private jwtService: JwtService,
-                private emailManager: EmailManager) {}
+    constructor(@inject(AuthRepository) private authRepository: AuthRepository,
+                @inject(UsersRepository) private usersRepository: UsersRepository,
+                @inject(JwtService) private jwtService: JwtService,
+                @inject(EmailManager) private emailManager: EmailManager) {}
 
     async checkCredentials(loginOrEmail: string, password: string) {
         const foundUser = await this.usersRepository.findUserByLoginOrEmail(loginOrEmail);

@@ -29,66 +29,36 @@ import {LikeRepository} from "./repositories/db-repo/like-db-repository";
 import {LikeService} from "./domain/like-service";
 import {Container} from "inversify";
 
-const commentsQueryRepository = new CommentsQueryRepository()
-const usersQueryRepository = new UsersQueryRepository()
-const securityDevicesQueryRepository = new SecurityDevicesQueryRepository()
-
-const emailAdapter = new EmailAdapter()
-const postsRepository = new PostsRepository()
-const commentsRepository = new CommentsRepository()
-const usersRepository = new UsersRepository()
-export const authRepository = new AuthRepository()
-const sessionsRepository = new SessionsRepository()
-const likeRepository = new LikeRepository()
-
-const emailManager = new EmailManager(emailAdapter)
-export const jwtService = new JwtService()
-const authService = new AuthService(
-    authRepository,
-    usersRepository,
-    jwtService,
-    emailManager
-);
-const usersService = new UsersService(usersRepository, emailManager)
-const commentsService = new CommentsService(commentsRepository, postsRepository, usersRepository);
-const sessionsService = new SessionsService(sessionsRepository, jwtService)
-const likeService = new LikeService(commentsService, likeRepository, commentsRepository)
-
-export const usersController = new UsersController(
-    usersService,
-    usersQueryRepository
-);
-
-export const commentsController = new CommentsController(
-    commentsService,
-    commentsQueryRepository,
-    likeService
-);
-
-export const authController = new AuthController(
-    authService,
-    usersQueryRepository,
-    usersService
-);
-
-export const securityDevicesController = new SecurityDevicesController(
-    sessionsService,
-    securityDevicesQueryRepository
-);
-
 export const container: Container = new Container();
 
 container.bind(BlogsController).to(BlogsController)
 container.bind(PostsController).to(PostsController)
+container.bind(UsersController).to(UsersController)
+container.bind(CommentsController).to(CommentsController)
+container.bind(AuthController).to(AuthController)
+container.bind(SecurityDevicesController).to(SecurityDevicesController)
 
+container.bind(EmailAdapter).to(EmailAdapter)
+container.bind(EmailManager).to(EmailManager)
 container.bind(BlogsService).to(BlogsService)
 container.bind(PostsService).to(PostsService)
+container.bind(UsersService).to(UsersService)
 container.bind(CommentsService).to(CommentsService)
+container.bind(LikeService).to(LikeService)
+container.bind(AuthService).to(AuthService)
+container.bind(JwtService).to(JwtService)
+container.bind(SessionsService).to(SessionsService)
 
 container.bind(BlogsRepository).to(BlogsRepository)
 container.bind(PostsRepository).to(PostsRepository)
 container.bind(CommentsRepository).to(CommentsRepository)
 container.bind(UsersRepository).to(UsersRepository)
+container.bind(LikeRepository).to(LikeRepository)
+container.bind(AuthRepository).to(AuthRepository)
+container.bind(SessionsRepository).to(SessionsRepository)
+
 container.bind(BlogsQueryRepository).to(BlogsQueryRepository)
 container.bind(PostsQueryRepository).to(PostsQueryRepository)
 container.bind(CommentsQueryRepository).to(CommentsQueryRepository)
+container.bind(UsersQueryRepository).to(UsersQueryRepository)
+container.bind(SecurityDevicesQueryRepository).to(SecurityDevicesQueryRepository)

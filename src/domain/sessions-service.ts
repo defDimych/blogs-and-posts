@@ -1,10 +1,12 @@
 import {JwtService} from "../application/jwt-service";
 import {SessionsRepository} from "../repositories/db-repo/sessions-db-repository";
 import {responseFactory} from "../utils/object-result";
+import {inject, injectable} from "inversify";
 
+@injectable()
 export class SessionsService {
-    constructor(private sessionsRepository: SessionsRepository,
-                private jwtService: JwtService) {}
+    constructor(@inject(SessionsRepository) private sessionsRepository: SessionsRepository,
+                @inject(JwtService) private jwtService: JwtService) {}
 
     async endSessionsExcludingCurrentOne(refreshToken: string) {
         const decodedPayload = this.jwtService.getPayloadFromToken(refreshToken);

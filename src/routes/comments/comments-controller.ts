@@ -8,11 +8,13 @@ import {CommentInputModel} from "../../types/comments-type/CommentInputModel";
 import {LikeInputModel} from "./like-types/LikeInputModel";
 import {UpdateLikeStatusDto} from "./UpdateLikeStatusDto";
 import {LikeService} from "../../domain/like-service";
+import {inject, injectable} from "inversify";
 
+@injectable()
 export class CommentsController {
-    constructor(private commentsService: CommentsService,
-                private commentsQueryRepository: CommentsQueryRepository,
-                private likeService: LikeService) {}
+    constructor(@inject(CommentsService) private commentsService: CommentsService,
+                @inject(CommentsQueryRepository) private commentsQueryRepository: CommentsQueryRepository,
+                @inject(LikeService) private likeService: LikeService) {}
 
     async getComment(req: RequestWithParams<{ commentId: string }>, res: Response){
         const result = await this.commentsService.checkComment(req.params.commentId);
