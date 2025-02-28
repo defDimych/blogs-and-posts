@@ -4,7 +4,7 @@ import {postsTestManager} from "./postsTestManager";
 import {req} from "./test-helpers";
 import {SETTINGS} from "../../src/utils/settings";
 import {HTTP_STATUSES} from "../../src/utils/http-statuses";
-import {Status} from "../../src/routes/comments/like.entity";
+import {Status} from "../../src/routes/likes/domain/comment-like.entity";
 import {CommentViewModel} from "../../src/types/comments-type/CommentViewModel";
 import {userInfoDTO} from "../comment-api.e2e.test";
 

@@ -1,5 +1,5 @@
 import {ObjectId} from "mongodb";
-import {PostDocument, PostModel} from "../../routes/posts/post.entity";
+import {PostDocument, PostModel} from "../../routes/posts/domain/post.entity";
 import {injectable} from "inversify";
 
 @injectable()

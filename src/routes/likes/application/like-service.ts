@@ -10,9 +10,11 @@ import {UpdatePostLikeStatusDto} from "./dto/UpdatePostLikeStatusDto";
 import {PostsRepository} from "../../../repositories/db-repo/posts-db-repository";
 import {CreatePostLikeDto} from "./dto/CreatePostLikeDto";
 import {PostLikeModel} from "../domain/post-like.entity";
+import {UserModel} from "../../users/user.entity";
+import {UsersRepository} from "../../../repositories/db-repo/users-db-repository";
 
 @injectable()
-export class LikeService {
+export class CommentLikeService {
     constructor(@inject(CommentsService) private commentsService: CommentsService,
                 @inject(LikeRepository) private likeRepository: LikeRepository,
                 @inject(CommentsRepository) private commentsRepository: CommentsRepository) {}
@@ -54,7 +56,6 @@ export class LikeService {
     }
 
     async updateLikeStatus(dto: UpdateCommentLikeStatusDto) {
-        // todo переписать обращение к репозиторию, а не коммент сервису
         const result = await this.commentsService.checkComment(dto.commentId);
 
         if (result.status !== DomainStatusCode.Success) {
@@ -82,9 +83,11 @@ export class LikeService {
     }
 }
 
+@injectable()
 export class PostLikeService {
     constructor(@inject(PostsRepository) private postsRepository: PostsRepository,
-                @inject(LikeRepository) private likeRepository: LikeRepository) {}
+                @inject(LikeRepository) private likeRepository: LikeRepository,
+                @inject(UsersRepository) private usersRepository: UsersRepository) {}
 
     async calculateLikes(likeStatus: string, currentStatus: string, postId: string) {
         const post = await this.postsRepository.findPostById(postId)
@@ -106,7 +109,19 @@ export class PostLikeService {
             post.likeCount++
         }
 
-        post.newestLikes = await this.likeRepository.getNewestLikes(postId)
+        const newestLikes = await this.likeRepository.getNewestLikes(postId)
+        const userIds = newestLikes.map(l => l.userId)
+
+        const users = await this.usersRepository.findUsersById(userIds);
+
+        newestLikes.forEach(like => {
+            const user = users.find(user => user._id.toString() === like.userId)
+            if (!user) throw new Error('User not found')
+
+            like.login = user.accountData.login
+        })
+
+        post.newestLikes = newestLikes
 
         await this.postsRepository.save(post)
     }

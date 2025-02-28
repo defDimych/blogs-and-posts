@@ -5,16 +5,16 @@ import {Response} from "express";
 import {DomainStatusCode, handleError} from "../../utils/object-result";
 import {HTTP_STATUSES} from "../../utils/http-statuses";
 import {CommentInputModel} from "../../types/comments-type/CommentInputModel";
-import {LikeInputModel} from "./like-types/LikeInputModel";
-import {UpdateLikeStatusDto} from "./UpdateLikeStatusDto";
-import {LikeService} from "../../domain/like-service";
+import {LikeInputModel} from "../../types/like-types/LikeInputModel";
+import {UpdateCommentLikeStatusDto} from "../likes/application/dto/UpdateCommentLikeStatusDto";
+import {CommentLikeService} from "../likes/application/like-service";
 import {inject, injectable} from "inversify";
 
 @injectable()
 export class CommentsController {
     constructor(@inject(CommentsService) private commentsService: CommentsService,
                 @inject(CommentsQueryRepository) private commentsQueryRepository: CommentsQueryRepository,
-                @inject(LikeService) private likeService: LikeService) {}
+                @inject(CommentLikeService) private commentLikeService: CommentLikeService) {}
 
     async getComment(req: RequestWithParams<{ commentId: string }>, res: Response){
         const result = await this.commentsService.checkComment(req.params.commentId);
@@ -40,13 +40,13 @@ export class CommentsController {
     }
     
     async updateLikeStatus(req: RequestWithParamsAndBody<{ commentId: string }, LikeInputModel>, res: Response){
-        const dto: UpdateLikeStatusDto = {
+        const dto: UpdateCommentLikeStatusDto = {
             userId: req.userId,
             commentId: req.params.commentId,
             likeStatus: req.body.likeStatus
         }
 
-        const result = await this.likeService.updateLikeStatus(dto);
+        const result = await this.commentLikeService.updateLikeStatus(dto);
 
         if (result.status !== DomainStatusCode.Success) {
             res.sendStatus(handleError(result.status));

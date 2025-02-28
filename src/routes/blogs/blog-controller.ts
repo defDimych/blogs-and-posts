@@ -36,6 +36,7 @@ export class BlogsController {
     }
 
     async getPostsSpecificBlog(req: RequestWithParamsAndQuery<{blogId: string}, PaginationQueryType>, res: Response){
+
         const foundBlog = await this.blogsQueryRepository.findBlogById(req.params.blogId);
 
         if (!foundBlog) {
@@ -43,7 +44,7 @@ export class BlogsController {
             return
         }
 
-        const receivedPosts = await this.postsQueryRepository.getAllPostsByBlogId(getDefaultPaginationOptions(req.query), foundBlog.id)
+        const receivedPosts = await this.postsQueryRepository.getAllPosts(getDefaultPaginationOptions(req.query),req.userId,foundBlog.id)
 
         res.status(HTTP_STATUSES.SUCCESS_200).send(receivedPosts);
     }

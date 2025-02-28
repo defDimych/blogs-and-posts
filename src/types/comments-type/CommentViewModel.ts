@@ -1,4 +1,4 @@
-import {Status} from "../../routes/comments/like.entity";
+import {Status} from "../../routes/likes/domain/comment-like.entity";
 
 type Commentator = {
     userId: string;

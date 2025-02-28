@@ -25,8 +25,8 @@ import {SessionsRepository} from "./repositories/db-repo/sessions-db-repository"
 import {SessionsService} from "./domain/sessions-service";
 import {SecurityDevicesQueryRepository} from "./repositories/query-repo/security-devices-query-repository";
 import {SecurityDevicesController} from "./routes/security-devices/security-devices-controller";
-import {LikeRepository} from "./repositories/db-repo/like-db-repository";
-import {LikeService} from "./domain/like-service";
+import {LikeRepository} from "./routes/likes/infrastructure/like-db-repository";
+import {CommentLikeService, PostLikeService} from "./routes/likes/application/like-service";
 import {Container} from "inversify";
 
 export const container: Container = new Container();
@@ -44,7 +44,8 @@ container.bind(BlogsService).to(BlogsService)
 container.bind(PostsService).to(PostsService)
 container.bind(UsersService).to(UsersService)
 container.bind(CommentsService).to(CommentsService)
-container.bind(LikeService).to(LikeService)
+container.bind(CommentLikeService).to(CommentLikeService)
+container.bind(PostLikeService).to(PostLikeService)
 container.bind(AuthService).to(AuthService)
 container.bind(JwtService).to(JwtService)
 container.bind(SessionsService).to(SessionsService)

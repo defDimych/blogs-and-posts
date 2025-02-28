@@ -8,7 +8,7 @@ import {MongoMemoryServer} from "mongodb-memory-server";
 import {ObjectId} from "mongodb";
 import {postsTestManager} from "./helpers/postsTestManager";
 import {runDb} from "../src/db/run-db";
-import {PostModel} from "../src/routes/posts/post.entity";
+import {PostModel} from "../src/routes/posts/domain/post.entity";
 
 describe('tests for /posts', async () => {
     let server: MongoMemoryServer;

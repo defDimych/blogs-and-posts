@@ -4,7 +4,7 @@ import {commentTestManager} from "./helpers/commentTestManager";
 import {CommentViewModel} from "../src/types/comments-type/CommentViewModel";
 import {usersTestManager} from "./helpers/usersTestManager";
 import {authTestManager} from "./helpers/authTestManager";
-import {Status} from "../src/routes/comments/like.entity";
+import {Status} from "../src/routes/likes/domain/comment-like.entity";
 
 export type userInfoDTO = {
     accessToken: string;

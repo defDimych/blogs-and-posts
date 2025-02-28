@@ -1,5 +1,5 @@
 import mongoose, {HydratedDocument, model, Model} from "mongoose";
-import {Commentator, CommentDbModel} from "../../types/comments-type/CommentDbModel";
+import {Commentator, CommentDbModel} from "../../../types/comments-type/CommentDbModel";
 
 type CommentModel = Model<CommentDbModel>
 

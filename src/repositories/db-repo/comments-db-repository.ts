@@ -1,5 +1,5 @@
 import {ObjectId} from "mongodb";
-import {CommentDocument, CommentModel} from "../../routes/comments/comment.entity";
+import {CommentDocument, CommentModel} from "../../routes/comments/domain/comment.entity";
 import {injectable} from "inversify";
 
 @injectable()

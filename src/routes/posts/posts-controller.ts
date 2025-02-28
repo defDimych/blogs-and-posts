@@ -16,23 +16,26 @@ import {DomainStatusCode, handleError} from "../../utils/object-result";
 import {PostInputModel} from "../../types/posts-types/PostInputModel";
 import {CommentInputModel} from "../../types/comments-type/CommentInputModel";
 import {inject, injectable} from "inversify";
+import {LikeInputModel} from "../../types/like-types/LikeInputModel";
+import {PostLikeService} from "../likes/application/like-service";
 
 @injectable()
 export class PostsController {
     constructor(@inject(PostsService) private postsService: PostsService,
                 @inject(PostsQueryRepository) private postsQueryRepository: PostsQueryRepository,
                 @inject(CommentsQueryRepository) private commentsQueryRepository: CommentsQueryRepository,
-                @inject(CommentsService) private commentsService: CommentsService) {}
+                @inject(CommentsService) private commentsService: CommentsService,
+                @inject(PostLikeService) private postLikeService: PostLikeService) {}
 
     async getPosts(req: RequestWithQuery<PaginationQueryType>, res: Response){
         const sorting: PaginationQueryType = req.query
-        const receivedPosts = await this.postsQueryRepository.getAllPosts(getDefaultPaginationOptions(sorting))
+        const receivedPosts = await this.postsQueryRepository.getAllPosts(getDefaultPaginationOptions(sorting), req.userId)
 
         res.status(HTTP_STATUSES.SUCCESS_200).send(receivedPosts);
     }
 
     async getPost(req: Request, res: Response){
-        const foundPost = await this.postsQueryRepository.findPostById(req.params.id);
+        const foundPost = await this.postsQueryRepository.findPostById(req.params.id, req.userId);
 
         if (!foundPost) {
             res.sendStatus(HTTP_STATUSES.NOT_FOUND_404);
@@ -85,6 +88,22 @@ export class PostsController {
         } else {
             res.sendStatus(HTTP_STATUSES.NOT_FOUND_404);
         }
+    }
+    
+    async updateLikeStatus(req: RequestWithParamsAndBody<{ postId: string }, LikeInputModel>, res: Response) {
+        const dto = {
+            postId: req.params.postId,
+            userId: req.userId,
+            likeStatus: req.body.likeStatus
+        }
+
+        const result = await this.postLikeService.updateLikeStatus(dto);
+
+        if (result.status !== DomainStatusCode.Success) {
+            res.sendStatus(handleError(result.status));
+            return
+        }
+        res.sendStatus(HTTP_STATUSES.NO_CONTENT_204)
     }
 
     async deletePost(req: Request, res: Response){

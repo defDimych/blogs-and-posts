@@ -3,8 +3,8 @@ import {PaginationType} from "../../routes/helpers/pagination-helper";
 import {CommentDbModel} from "../../types/comments-type/CommentDbModel";
 import {PaginationModel} from "../../types/PaginationModel";
 import {CommentViewModel} from "../../types/comments-type/CommentViewModel";
-import {CommentModel} from "../../routes/comments/comment.entity";
-import {LikeDB, LikeModel, Status} from "../../routes/comments/like.entity";
+import {CommentModel} from "../../routes/comments/domain/comment.entity";
+import {CommentLikeDbType, CommentLikeModel, Status} from "../../routes/likes/domain/comment-like.entity";
 import {injectable} from "inversify";
 
 @injectable()
@@ -28,7 +28,7 @@ export class CommentsQueryRepository {
             const [comments, totalCount] = await Promise.all([commentsPromise, totalCountPromise]);
 
             const ids = comments.map(comment => comment._id.toString())
-            const likes = await LikeModel.find({ commentId: {$in: ids}, userId }).lean()
+            const likes = await CommentLikeModel.find({ commentId: {$in: ids}, userId }).lean()
 
             const dictionaryLikes = likes.reduce((dict, like) => {
                 dict.set(like.commentId, like.myStatus)
@@ -74,8 +74,8 @@ export class CommentsQueryRepository {
         return comment
     }
 
-    async findLike(commentId: string, userId: string): Promise<WithId<LikeDB>> {
-        const like = await LikeModel.findOne({commentId, userId}).lean()
+    async findLike(commentId: string, userId: string): Promise<WithId<CommentLikeDbType>> {
+        const like = await CommentLikeModel.findOne({commentId, userId}).lean()
         if (!like) throw new Error('like not found')
 
         return like
@@ -84,7 +84,7 @@ export class CommentsQueryRepository {
     async getComment(commentId: string, userId: string): Promise<CommentViewModel> {
         const comment = await this.findCommentById(commentId);
 
-        const like = await LikeModel.findOne({ commentId: comment._id.toString(), userId });
+        const like = await CommentLikeModel.findOne({ commentId: comment._id.toString(), userId });
 
         return {
             id: comment._id.toString(),

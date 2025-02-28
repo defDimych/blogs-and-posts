@@ -2,7 +2,7 @@ import {CommentsRepository} from "../repositories/db-repo/comments-db-repository
 import {responseFactory, Result} from "../utils/object-result";
 import {PostsRepository} from "../repositories/db-repo/posts-db-repository";
 import {UsersRepository} from "../repositories/db-repo/users-db-repository";
-import {CommentModel} from "../routes/comments/comment.entity";
+import {CommentModel} from "../routes/comments/domain/comment.entity";
 import {inject, injectable} from "inversify";
 
 @injectable()

@@ -5,6 +5,10 @@ import {injectable} from "inversify";
 
 @injectable()
 export class UsersRepository {
+    async findUsersById(ids: string[]) {
+        return UserModel.find({ _id: {$in: ids} }).lean()
+    }
+
     async findUserById(userId: string): Promise<WithId<UserDbModel>> {
         const user = await UserModel.findOne({ _id: new ObjectId(userId) }).lean();
 
